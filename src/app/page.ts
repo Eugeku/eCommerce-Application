@@ -9,6 +9,8 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
 
   constructor(id: string = 'page-wrapper-component', className: string = 'page-wrapper-component') {
     super(Tags.DIV, id, className);
+    
+    this.init();
   }
 
   protected renderComponent(): void {
@@ -20,7 +22,9 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
     return;
   }
 
-  private renderNotFoundComponent() {
+  private renderNotFoundComponent(): void {
+    console.log('openNotFound');
+    console.log(this.notFound);
     this.notFound.appendTo(this.getElement());
   }
 

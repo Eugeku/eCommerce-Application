@@ -12,6 +12,9 @@ export default abstract class BaseComponent<T extends HTMLElement> {
 
     Object.setPrototypeOf(this.element, Object.getPrototypeOf(document.createElement(tagName)));
     this.setAttributes();
+  }
+
+  protected init(): void {
     this.renderComponent();
     this.addEventListeners();
   }

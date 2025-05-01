@@ -21,6 +21,8 @@ class NotFoundComponent extends BaseComponent<HTMLDivElement> {
     super(Tags.DIV, id, className);
 
     this.h3 = createH3(undefined, 'heading-3');
+    
+    this.init();
   }
 
   /**
