@@ -3,4 +3,6 @@ export type AppEvents = {
   userLoggedOut: { userId: string };
   toggleBurger: object;
   hideBurger: object;
+  stopScrollWrapper: object;
+  addScrollWrapper: object;
 };

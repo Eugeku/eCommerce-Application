@@ -25,13 +25,21 @@ class HeaderComponent extends BaseComponent<HTMLDivElement> {
   }
 
   public toggleBurgerMenu(): void {
-    this.navContainer.getElement().classList.toggle('side-menu');
-    this.burgerButton.getElement().classList.toggle('crossed');
+    if (!this.burgerButton.getElement().classList.contains('side-menu')) {
+      this.navContainer.getElement().classList.add('side-menu');
+      this.burgerButton.getElement().classList.add('crossed');
+      PublishSubscriber().publish('stopScrollWrapper', {});
+    } else if (this.burgerButton.getElement().classList.contains('side-menu')) {
+      this.navContainer.getElement().classList.remove('side-menu');
+      this.burgerButton.getElement().classList.remove('crossed');
+      PublishSubscriber().publish('addScrollWrapper', {});
+    }
   }
 
   public hideBurgerMenu(): void {
     this.navContainer.removeClass('side-menu');
     this.burgerButton.removeClass('crossed');
+    PublishSubscriber().publish('addScrollWrapper', {});
   }
 
   protected renderComponent(): void {

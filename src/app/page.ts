@@ -6,6 +6,7 @@ import { Login } from './components/login/login';
 import { Main } from './components/main/main';
 import { Registration } from './components/registration/registration';
 import { PlaceholderPage } from './components/under-construction/under-construction';
+import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 import './page.scss';
 
 export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
@@ -59,7 +60,28 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   }
 
   protected addEventListeners(): void {
-    return;
+    this.addStopScroll();
+    this.addScroll();
+  }
+
+  protected addStopScroll(): void {
+    PublishSubscriber().subscribe('stopScrollWrapper', () => {
+      /*
+      if (!this.getElement().classList.contains('no-scroll')) {
+      */
+      this.addClass('no-scroll');
+      /*
+      } else if (this.getElement().classList.contains('no-scroll')) {
+        this.removeClass('no-scroll');
+      }
+      */
+    });
+  }
+
+  protected addScroll(): void {
+    PublishSubscriber().subscribe('addScrollWrapper', () => {
+      this.removeClass('no-scroll');
+    });
   }
 
   private renderAllComponentsExcept(component: BaseComponent<HTMLDivElement>): void {
