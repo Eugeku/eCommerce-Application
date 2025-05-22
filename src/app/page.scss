@@ -7,4 +7,8 @@
   width: 100%;
   max-width: 1200px;
   height: 100%;
+
+  &.no-scroll {
+    overflow-y: hidden;
+  }
 }
