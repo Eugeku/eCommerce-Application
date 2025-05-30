@@ -9,7 +9,7 @@ export class PostalCodeValidatingInput extends BaseValidatingInputComponent {
   constructor(
     id: string = 'postal-code-input',
     className: string = 'postal-code-input',
-    onInputChangedCallback: (() => void) | null,
+    onInputChangedCallback: (() => void) | undefined,
     labelParameters: LabelParameters | undefined,
   ) {
     super(id, className, onInputChangedCallback, labelParameters);
@@ -29,7 +29,7 @@ export class PostalCodeValidatingInput extends BaseValidatingInputComponent {
 }
 
 export const postalCodeValidatingInput = (
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
   labelParameters: LabelParameters | undefined = undefined,
 ): PostalCodeValidatingInput =>
   new PostalCodeValidatingInput(

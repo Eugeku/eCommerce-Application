@@ -10,7 +10,7 @@ describe('CountrySelect', () => {
   ];
 
   beforeEach(() => {
-    component = new CountrySelect(optionPairs, null, 'country-id', 'custom-class');
+    component = new CountrySelect(optionPairs, undefined, 'country-id', 'custom-class');
     document.body.append(component.getElement());
   });
 

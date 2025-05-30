@@ -28,14 +28,14 @@ export class AddressComponent extends BaseComponent<HTMLDivElement> {
   private readonly countrySelect: CountrySelect;
   private readonly checkBox: Checkbox;
 
-  private readonly onInputChangedCallback: (() => void) | null;
+  private readonly onInputChangedCallback: (() => void) | undefined;
 
   constructor(
     id: string = 'address-component',
     className: string = 'address-component',
     headerText: string,
     checkboxText: string,
-    onInputChangedCallback: (() => void) | null = null,
+    onInputChangedCallback: (() => void) | undefined,
   ) {
     super(Tags.DIV, id, className);
     this.onInputChangedCallback = onInputChangedCallback;
@@ -148,7 +148,7 @@ export class AddressComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private createCheckBox(checkboxText: string): Checkbox {
-    return checkbox(undefined, 'address-checkbox', null, checkboxText);
+    return checkbox(undefined, 'address-checkbox', undefined, checkboxText);
   }
 }
 
@@ -157,6 +157,6 @@ export const addressComponent = (
   className: string = 'address-component',
   headerText: string,
   checkboxText: string,
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
 ): AddressComponent =>
   new AddressComponent(id, className, headerText, checkboxText, onInputChangedCallback);

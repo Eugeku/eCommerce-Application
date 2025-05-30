@@ -14,7 +14,7 @@ export class DateValidatingInput extends BaseValidatingInputComponent {
   constructor(
     id: string = 'date-input',
     className: string = 'date-input',
-    onInputChangedCallback: (() => void) | null,
+    onInputChangedCallback: (() => void) | undefined,
     labelParameters: LabelParameters | undefined,
   ) {
     super(id, className, onInputChangedCallback, labelParameters);
@@ -45,7 +45,7 @@ export class DateValidatingInput extends BaseValidatingInputComponent {
 }
 
 export const dateValidatingInput = (
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
   labelParameters: LabelParameters | undefined = undefined,
 ): DateValidatingInput =>
   new DateValidatingInput('date-input', 'date-input', onInputChangedCallback, labelParameters);

@@ -15,17 +15,18 @@ export type LabelParameters = {
 };
 
 export abstract class BaseValidatingInputComponent extends BaseComponent<HTMLDivElement> {
-  public readonly input: BaseComponent<HTMLInputElement>;
+  protected readonly input: BaseComponent<HTMLInputElement>;
+
   private readonly labelParams?: LabelParameters;
   private readonly label?: BaseComponent<HTMLLabelElement>;
   private readonly tooltip: BaseComponent<HTMLDivElement>;
   private readonly validationPair: Map<ValidatingRule, BaseComponent<HTMLSpanElement>> = new Map();
-  private readonly onInputChangedCallback: (() => void) | null;
+  private readonly onInputChangedCallback: (() => void) | undefined;
 
   constructor(
     id: string = '',
     className: string = 'validating-input-component',
-    onInputChangedCallback: (() => void) | null,
+    onInputChangedCallback: (() => void) | undefined,
     labelParameters: LabelParameters | undefined,
   ) {
     super(Tags.DIV, id, className);
@@ -38,8 +39,16 @@ export abstract class BaseValidatingInputComponent extends BaseComponent<HTMLDiv
     this.createErrorMessages();
   }
 
+  public setActive(state: boolean): void {
+    this.input.getElement().readOnly = !state;
+  }
+
   public getInputValue(): string {
     return this.input.getElement().value || '';
+  }
+
+  public setInputValue(value: string): void {
+    this.input.getElement().value = value;
   }
 
   public isValid(): boolean {

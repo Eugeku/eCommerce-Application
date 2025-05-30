@@ -8,7 +8,7 @@ export class EmailValidatingInput extends BaseValidatingInputComponent {
   constructor(
     id: string = 'email-input',
     className: string = 'email-input',
-    onInputChangedCallback: (() => void) | null,
+    onInputChangedCallback: (() => void) | undefined,
     labelParameters: LabelParameters | undefined,
   ) {
     super(id, className, onInputChangedCallback, labelParameters);
@@ -31,7 +31,7 @@ export class EmailValidatingInput extends BaseValidatingInputComponent {
 }
 
 export const emailValidatingInput = (
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
   labelParameters: LabelParameters | undefined = undefined,
 ): EmailValidatingInput =>
   new EmailValidatingInput('email-input', 'email-input', onInputChangedCallback, labelParameters);

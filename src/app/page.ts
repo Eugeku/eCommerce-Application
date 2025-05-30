@@ -4,6 +4,7 @@ import { NotFound } from '@components/404/404';
 import { Header } from './components/header/header';
 import { Login } from './components/login/login';
 import { Main } from './components/main/main';
+import { Profile } from './components/profile/profile';
 import { Registration } from './components/registration/registration';
 import { PlaceholderPage } from './components/under-construction/under-construction';
 import './page.scss';
@@ -15,6 +16,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   private readonly login = Login();
   private readonly registration = Registration();
   private readonly placeholder = PlaceholderPage();
+  private readonly profile = Profile();
 
   constructor(id: string = 'page-wrapper-component', className: string = 'page-wrapper-component') {
     super(Tags.DIV, id, className);
@@ -51,7 +53,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   }
 
   public openProfile(): void {
-    this.renderAllComponentsExcept(this.placeholder);
+    this.renderAllComponentsExcept(this.profile);
   }
 
   protected renderComponent(): void {
@@ -70,6 +72,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
     this.login.remove();
     this.registration.remove();
     this.placeholder.remove();
+    this.profile.remove();
     component.appendTo(this.getElement());
     // append footer
   }

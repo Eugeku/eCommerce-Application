@@ -8,12 +8,12 @@ export type CountrySelectOptionPair = {
 };
 
 export class CountrySelect extends BaseComponent<HTMLSelectElement> {
-  private readonly onSelectChangedCallback: (() => void) | null;
+  private readonly onSelectChangedCallback: (() => void) | undefined;
   private readonly optionPairs: BaseComponent<HTMLOptionElement>[] = [];
 
   constructor(
     optionPairs: CountrySelectOptionPair[],
-    onSelectChangedCalback: (() => void) | null,
+    onSelectChangedCalback: (() => void) | undefined,
     id: string = '',
     className: string = 'country-select-component',
   ) {
@@ -23,6 +23,10 @@ export class CountrySelect extends BaseComponent<HTMLSelectElement> {
     this.createOptions(optionPairs);
 
     this.init();
+  }
+
+  public setActive(state: boolean): void {
+    this.getElement().disabled = !state;
   }
 
   public getValue(): string {

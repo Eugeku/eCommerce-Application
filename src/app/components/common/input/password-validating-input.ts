@@ -13,7 +13,7 @@ export class PasswordValidatingInput extends BaseValidatingInputComponent {
   constructor(
     id: string = 'password-input',
     className: string = 'password-input',
-    onInputChangedCallback: (() => void) | null,
+    onInputChangedCallback: (() => void) | undefined,
     labelParameters: LabelParameters | undefined,
   ) {
     super(id, className, onInputChangedCallback, labelParameters);
@@ -68,7 +68,7 @@ export class PasswordValidatingInput extends BaseValidatingInputComponent {
 }
 
 export const passwordValidatingInput = (
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
   labelParameters: LabelParameters | undefined = undefined,
 ): PasswordValidatingInput =>
   new PasswordValidatingInput(

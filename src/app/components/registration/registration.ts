@@ -274,7 +274,7 @@ class RegistrationComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private createUseAsBillingCheckbox(): Checkbox {
-    return checkbox(undefined, 'address-checkbox', null, 'Use the same address for billing');
+    return checkbox(undefined, 'address-checkbox', undefined, 'Use the same address for billing');
   }
 
   private createSignUpButton(): BaseComponent<HTMLButtonElement> {

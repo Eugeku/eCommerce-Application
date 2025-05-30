@@ -8,7 +8,7 @@ export class LastNameValidatingInput extends BaseValidatingInputComponent {
   constructor(
     id: string = 'last-name-input',
     className: string = 'last-name-input',
-    onInputChangedCallback: (() => void) | null,
+    onInputChangedCallback: (() => void) | undefined,
     labelParameters: LabelParameters | undefined,
   ) {
     super(id, className, onInputChangedCallback, labelParameters);
@@ -31,7 +31,7 @@ export class LastNameValidatingInput extends BaseValidatingInputComponent {
 }
 
 export const lastNameValidatingInput = (
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
   labelParameters: LabelParameters | undefined = undefined,
 ): LastNameValidatingInput =>
   new LastNameValidatingInput(
