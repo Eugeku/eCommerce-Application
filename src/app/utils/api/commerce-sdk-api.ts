@@ -7,6 +7,7 @@ import { type ClientResponse } from '@commercetools/ts-client';
 import { CustomerBuilder } from '@utils/api/bean/customer-builder';
 import { ApiClient } from '@utils/api/build-client';
 import { clearTokens, UserCache } from '@utils/api/token-cache';
+import type { PersonalInfoData } from '@/app/components/profile/personal-info-component';
 
 class CommerceSdkApi {
   private static instance: CommerceSdkApi;
@@ -49,6 +50,37 @@ class CommerceSdkApi {
               ? 1
               : 0
             : undefined,
+        },
+      })
+      .execute();
+  }
+
+  public async updateCustomer(data: PersonalInfoData): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+
+    return this.apiRoot
+      .me()
+      .post({
+        body: {
+          version: me.body.version,
+          actions: [
+            {
+              action: 'changeEmail',
+              email: data.email,
+            },
+            {
+              action: 'setFirstName',
+              firstName: data.firstName,
+            },
+            {
+              action: 'setLastName',
+              lastName: data.lastName,
+            },
+            {
+              action: 'setDateOfBirth',
+              dateOfBirth: data.dateOfBirth,
+            },
+          ],
         },
       })
       .execute();

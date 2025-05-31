@@ -7,15 +7,19 @@ import {
   createH2,
   createH3,
 } from '@components/common/base-component-factory';
-import type { PersonalInfoComponent } from './personal-info-component';
+import type { PersonalInfoComponent, PersonalInfoData } from './personal-info-component';
 import { PersonalInfo } from './personal-info-component';
 import type { ProfileAddressComponent } from './profile-address-component';
 import { profileAddressComponent } from './profile-address-component';
 import './profile.scss';
+import { ApiPopup } from '../api-popup/api-popup';
+import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { UserCache } from '@/app/utils/api/token-cache';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 
 class ProfileComponent extends BaseComponent<HTMLDivElement> {
+  private readonly ApiPopup = ApiPopup();
+
   private readonly h2: BaseComponent<HTMLHeadingElement>;
   private readonly container: BaseComponent<HTMLDivElement>;
   private readonly personalInfo: PersonalInfoComponent;
@@ -31,7 +35,7 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
 
     this.h2 = createH2(undefined, 'heading-2');
     this.container = createDiv(undefined, 'profile-container');
-    this.personalInfo = PersonalInfo();
+    this.personalInfo = PersonalInfo(this.savePersonalInfo.bind(this));
     this.addressContainer = createDiv(undefined, 'address-info');
     this.addressInfoTitle = createH3(undefined, 'heading-3');
     this.addressWrapper = createDiv(undefined, 'address-wrapper');
@@ -126,6 +130,48 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
 
       this.addresses.push(address);
     }
+  }
+
+  private async savePersonalInfo(data: PersonalInfoData): Promise<void> {
+    this.personalInfo.setUneditable();
+
+    if (!dataChanged(data)) return;
+
+    await SdkApi()
+      .updateCustomer(data)
+      .then(() => {
+        this.renderPopupMessage('Profile updated', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+        this.setData();
+        PublishSubscriber().publish('userUpdated', { userId: data.email });
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+
+    function dataChanged(data: PersonalInfoData): boolean {
+      const customer = UserCache.get();
+      if (!customer) return false;
+
+      return (
+        data.email !== customer.email ||
+        data.firstName !== customer.firstName ||
+        data.lastName !== customer.lastName ||
+        data.dateOfBirth !== customer.dateOfBirth
+      );
+    }
+  }
+
+  private renderPopupMessage(message: string, callback?: () => void): void {
+    this.ApiPopup.appendTo(this.getElement());
+    this.ApiPopup.setErrorMessage(message);
+    if (callback) this.ApiPopup.onClose(callback);
+    this.ApiPopup.show();
   }
 }
 

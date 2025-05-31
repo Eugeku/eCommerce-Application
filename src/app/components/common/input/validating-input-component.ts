@@ -49,6 +49,9 @@ export abstract class BaseValidatingInputComponent extends BaseComponent<HTMLDiv
 
   public setInputValue(value: string): void {
     this.input.getElement().value = value;
+
+    this.validate();
+    this.onInputChangedCallback?.();
   }
 
   public isValid(): boolean {
