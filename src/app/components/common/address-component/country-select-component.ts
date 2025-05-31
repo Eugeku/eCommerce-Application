@@ -33,6 +33,10 @@ export class CountrySelect extends BaseComponent<HTMLSelectElement> {
     return this.getElement().value || '';
   }
 
+  public setValue(value: string): void {
+    this.getElement().value = value;
+  }
+
   protected renderComponent(): void {
     this.renderOptions();
   }

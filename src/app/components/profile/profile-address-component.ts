@@ -23,6 +23,15 @@ const Classes = {
   HIDDEN: 'hidden',
 };
 
+export type ProfileAddressData = {
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  isDefaultShipping: boolean;
+  isDefaultBilling: boolean;
+};
+
 export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
   private readonly coutriesPairs: Array<CountrySelectOptionPair> = [
     { value: 'US', text: 'United States' },
@@ -74,10 +83,13 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
     this.init();
   }
 
-  public setData(): void {
-    this.streetInput.setInputValue('some street');
-    this.cityInput.setInputValue('some city');
-    this.postalCodeInput.setInputValue('12345');
+  public setData(data: ProfileAddressData): void {
+    this.streetInput.setInputValue(data.street);
+    this.cityInput.setInputValue(data.city);
+    this.postalCodeInput.setInputValue(data.postalCode);
+    this.countrySelect.setValue(data.country);
+    this.shippingRadioButton.setChecked(data.isDefaultShipping);
+    this.billingRadioButton.setChecked(data.isDefaultBilling);
   }
 
   public setEditable(): void {
@@ -148,12 +160,10 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
   protected addEventListeners(): void {
     this.saveButton.addEventListener('click', () => {
       this.setUneditable();
-      console.log('save button clicked');
     });
 
     this.editButton.addEventListener('click', () => {
       this.setEditable();
-      console.log('edit button clicked');
     });
 
     this.deleteButton.addEventListener('click', () => {

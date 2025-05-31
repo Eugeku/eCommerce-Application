@@ -1,4 +1,5 @@
 import { Tags } from '@app/components/common/tags';
+import type { Customer } from '@commercetools/platform-sdk';
 import BaseComponent from '@components/common/base-component';
 import {
   createButton,
@@ -11,6 +12,8 @@ import { PersonalInfo } from './personal-info-component';
 import type { ProfileAddressComponent } from './profile-address-component';
 import { profileAddressComponent } from './profile-address-component';
 import './profile.scss';
+import { UserCache } from '@/app/utils/api/token-cache';
+import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 
 class ProfileComponent extends BaseComponent<HTMLDivElement> {
   private readonly h2: BaseComponent<HTMLHeadingElement>;
@@ -21,8 +24,7 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
   private readonly addressWrapper: BaseComponent<HTMLDivElement>;
   private readonly addAddressButton: BaseComponent<HTMLButtonElement>;
 
-  private address1: ProfileAddressComponent;
-  private address2: ProfileAddressComponent;
+  private addresses: ProfileAddressComponent[] = [];
 
   constructor(id: string = 'profile-component', className: string = 'profile-component') {
     super(Tags.DIV, id, className);
@@ -35,15 +37,16 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
     this.addressWrapper = createDiv(undefined, 'address-wrapper');
     this.addAddressButton = this.createAddAddressButton();
 
-    this.address1 = profileAddressComponent(undefined, 'profile-address-component', 'Address');
-    this.address2 = profileAddressComponent(undefined, 'profile-address-component', 'Address');
-
-    this.setAddresses();
-
     this.init();
+
+    this.setData();
   }
 
-  protected addEventListeners(): void {}
+  protected addEventListeners(): void {
+    PublishSubscriber().subscribe('userLoggedIn', () => {
+      this.setData();
+    });
+  }
 
   protected renderComponent(): void {
     this.renderH2();
@@ -53,9 +56,6 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
     this.renderAddressInfoTitle();
     this.addressWrapper.appendTo(this.addressContainer.getElement());
     this.addAddressButton.appendTo(this.addressContainer.getElement());
-
-    this.address1.appendTo(this.addressWrapper.getElement());
-    this.address2.appendTo(this.addressWrapper.getElement());
   }
 
   private renderH2(): void {
@@ -79,12 +79,53 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
     return addAddressButton;
   }
 
-  private setAddresses(): void {
-    this.address1.setData();
-    this.address2.setData();
+  private async setData(): Promise<void> {
+    const customer = UserCache.get();
 
-    this.address1.setUneditable();
-    this.address2.setUneditable();
+    if (customer) {
+      this.setPersonalInfo(customer);
+      this.setAddresses(customer);
+    }
+  }
+
+  private setPersonalInfo(customer: Customer): void {
+    this.personalInfo.setData({
+      firstName: customer.firstName || '',
+      lastName: customer.lastName || '',
+      dateOfBirth: customer.dateOfBirth || '',
+      email: customer.email,
+    });
+    this.personalInfo.setUneditable();
+  }
+
+  private setAddresses(customer: Customer): void {
+    for (const address of this.addresses) {
+      address.remove();
+    }
+    this.addresses = [];
+
+    const defaultShippingAddressId = customer.defaultShippingAddressId || '';
+    const defaultBillingAddressId = customer.defaultBillingAddressId || '';
+    for (const addressData of customer.addresses) {
+      const address = profileAddressComponent(undefined, 'profile-address-component', 'Address');
+      address.appendTo(this.addressWrapper.getElement());
+
+      const isDefaultShipping =
+        addressData.id !== undefined && addressData.id === defaultShippingAddressId;
+      const isDefaultBilling =
+        addressData.id !== undefined && addressData.id === defaultBillingAddressId;
+      address.setData({
+        street: addressData.streetName || '',
+        city: addressData.city || '',
+        postalCode: addressData.postalCode || '',
+        country: addressData.country,
+        isDefaultShipping: isDefaultShipping,
+        isDefaultBilling: isDefaultBilling,
+      });
+      address.setUneditable();
+
+      this.addresses.push(address);
+    }
   }
 }
 

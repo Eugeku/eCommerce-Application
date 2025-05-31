@@ -10,6 +10,17 @@ import type { LastNameValidatingInput } from '@components/common/input/last-name
 import { createButton, createH3 } from '../common/base-component-factory';
 import { Tags } from '../common/tags';
 
+const Classes = {
+  HIDDEN: 'hidden',
+};
+
+export type PersonalInfoData = {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  email: string;
+};
+
 export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
   private readonly personalInfoTitle: BaseComponent<HTMLHeadingElement>;
   private readonly firstNameInput: FirstNameValidatingInput;
@@ -18,6 +29,7 @@ export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
   private readonly emailInput: EmailValidatingInput;
   private readonly changePasswordButton: BaseComponent<HTMLButtonElement>;
   private readonly editButton: BaseComponent<HTMLButtonElement>;
+  private readonly saveButton: BaseComponent<HTMLButtonElement>;
 
   constructor(id: string = 'personal-info', className: string = 'personal-info') {
     super(Tags.DIV, id, className);
@@ -29,11 +41,48 @@ export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
     this.emailInput = this.createEmailInput();
     this.changePasswordButton = this.createChangePassword();
     this.editButton = this.createEditButton();
+    this.saveButton = this.createSaveButton();
 
     this.init();
   }
 
-  protected addEventListeners(): void {}
+  public setData(data: PersonalInfoData): void {
+    this.firstNameInput.setInputValue(data.firstName);
+    this.lastNameInput.setInputValue(data.lastName);
+    this.dateInput.setInputValue(data.dateOfBirth);
+    this.emailInput.setInputValue(data.email);
+  }
+
+  public setEditable(): void {
+    this.setActive(true);
+
+    this.editButton.addClass(Classes.HIDDEN);
+    this.saveButton.removeClass(Classes.HIDDEN);
+  }
+
+  public setUneditable(): void {
+    this.setActive(false);
+
+    this.editButton.removeClass(Classes.HIDDEN);
+    this.saveButton.addClass(Classes.HIDDEN);
+  }
+
+  public setActive(state: boolean): void {
+    this.firstNameInput.setActive(state);
+    this.lastNameInput.setActive(state);
+    this.dateInput.setActive(state);
+    this.emailInput.setActive(state);
+  }
+
+  protected addEventListeners(): void {
+    this.saveButton.addEventListener('click', () => {
+      this.setUneditable();
+    });
+
+    this.editButton.addEventListener('click', () => {
+      this.setEditable();
+    });
+  }
 
   protected renderComponent(): void {
     this.renderPersonalInfoTitle();
@@ -43,6 +92,7 @@ export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
     this.emailInput.appendTo(this.getElement());
     this.changePasswordButton.appendTo(this.getElement());
     this.editButton.appendTo(this.getElement());
+    this.saveButton.appendTo(this.getElement());
   }
 
   private renderPersonalInfoTitle(): void {
@@ -55,6 +105,13 @@ export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
     editButton.setText('Edit');
     editButton.addClass('edit-button');
     return editButton;
+  }
+
+  private createSaveButton(): BaseComponent<HTMLButtonElement> {
+    const button = createButton(undefined, 'button');
+    button.setText('Save');
+    button.addClass('address-button');
+    return button;
   }
 
   private createChangePassword(): BaseComponent<HTMLButtonElement> {

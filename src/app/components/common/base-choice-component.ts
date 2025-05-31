@@ -33,6 +33,10 @@ export abstract class BaseChoiceComponent extends BaseComponent<HTMLDivElement> 
     return this.input.getElement().checked;
   }
 
+  public setChecked(state: boolean): void {
+    this.input.getElement().checked = state;
+  }
+
   protected renderComponent(): void {
     this.input.appendTo(this.label.getElement());
     this.label.appendTo(this.getElement());
