@@ -70,6 +70,7 @@ class LoginComponent extends BaseComponent<HTMLDivElement> {
     await SdkApi()
       .loginUser(email, password)
       .then(() => {
+        this.clearInputs();
         return SdkApi().withPasswordFlow(email, password).getMe();
       })
       .then((response) => {
@@ -80,6 +81,11 @@ class LoginComponent extends BaseComponent<HTMLDivElement> {
       .catch((error) => {
         this.renderPopupMessage(error.body.message);
       });
+  }
+
+  private clearInputs(): void {
+    this.emailInputComponent.setInputValue('');
+    this.passwordInputComponent.setInputValue('');
   }
 
   private renderForm(): void {
