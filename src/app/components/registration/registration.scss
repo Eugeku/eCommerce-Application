@@ -161,6 +161,11 @@
       }
     }
 
+    input[type='date']::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      padding-right: 0.5rem;
+    }
+
     .submit-button {
       cursor: pointer;
 
