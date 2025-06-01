@@ -8,8 +8,7 @@ import { type ClientResponse } from '@commercetools/ts-client';
 import { CustomerBuilder } from '@utils/api/bean/customer-builder';
 import { ApiClient } from '@utils/api/build-client';
 import { clearTokens, UserCache } from '@utils/api/token-cache';
-import type { AddressData } from '@/app/components/popups/add-address-popup/add-address-popup';
-import type { PersonalInfoData } from '@/app/components/profile/personal-info-component';
+import type { AddressData, PersonalInfoData } from '@/app/components/profile/profile';
 
 class CommerceSdkApi {
   private static instance: CommerceSdkApi;
@@ -104,7 +103,7 @@ class CommerceSdkApi {
       },
     ];
 
-    if (data.isDefaultSipping) {
+    if (data.isDefaultShipping) {
       actions.push({
         action: 'setDefaultShippingAddress',
         addressKey: data.key,
@@ -124,6 +123,25 @@ class CommerceSdkApi {
         body: {
           version: me.body.version,
           actions: actions,
+        },
+      })
+      .execute();
+  }
+
+  public async deleteAddress(key: string): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+
+    return this.apiRoot
+      .me()
+      .post({
+        body: {
+          version: me.body.version,
+          actions: [
+            {
+              action: 'removeAddress',
+              addressKey: key,
+            },
+          ],
         },
       })
       .execute();

@@ -1,4 +1,5 @@
 import BaseComponent from '@app/components/common/base-component';
+import { createButton, createH3 } from '@components/common/base-component-factory';
 import { dateValidatingInput } from '@components/common/input/date-validating-input';
 import type { DateValidatingInput } from '@components/common/input/date-validating-input';
 import { emailValidatingInput } from '@components/common/input/email-validating-input';
@@ -7,18 +8,11 @@ import { firstNameValidatingInput } from '@components/common/input/first-name-va
 import type { FirstNameValidatingInput } from '@components/common/input/first-name-validating-input';
 import { lastNameValidatingInput } from '@components/common/input/last-name-validating-input';
 import type { LastNameValidatingInput } from '@components/common/input/last-name-validating-input';
-import { createButton, createH3 } from '../common/base-component-factory';
-import { Tags } from '../common/tags';
+import { Tags } from '@components/common/tags';
+import type { PersonalInfoData } from './profile';
 
 const Classes = {
   HIDDEN: 'hidden',
-};
-
-export type PersonalInfoData = {
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  email: string;
 };
 
 export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {

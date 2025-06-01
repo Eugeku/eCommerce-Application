@@ -1,8 +1,8 @@
 import { Tags } from '@app/components/common/tags';
-import type { AddressData } from '@app/components/popups/add-address-popup/add-address-popup';
 import { AddAddressPopup } from '@app/components/popups/add-address-popup/add-address-popup';
 import { ApiPopup } from '@app/components/popups/api-popup/api-popup';
 import { ChangePasswordPopup } from '@app/components/popups/change-password-popup/change-password-popup';
+import { DeleteAddressPopup } from '@app/components/popups/delete-address-popup/delete-address-popup';
 import type { Customer } from '@commercetools/platform-sdk';
 import BaseComponent from '@components/common/base-component';
 import {
@@ -11,7 +11,7 @@ import {
   createH2,
   createH3,
 } from '@components/common/base-component-factory';
-import type { PersonalInfoComponent, PersonalInfoData } from './personal-info-component';
+import type { PersonalInfoComponent } from './personal-info-component';
 import { PersonalInfo } from './personal-info-component';
 import type { ProfileAddressComponent } from './profile-address-component';
 import { profileAddressComponent } from './profile-address-component';
@@ -20,10 +20,28 @@ import { UserCache } from '@/app/utils/api/token-cache';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 import './profile.scss';
 
+export type PersonalInfoData = {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  email: string;
+};
+
+export type AddressData = {
+  key: string;
+  street: string;
+  city: string;
+  country: string;
+  postalCode: string;
+  isDefaultBilling: boolean;
+  isDefaultShipping: boolean;
+};
+
 class ProfileComponent extends BaseComponent<HTMLDivElement> {
   private readonly apiPopup = ApiPopup();
   private readonly addAddressPopup = AddAddressPopup(this.onAddressAdded.bind(this));
   private readonly changePasswordPopup = ChangePasswordPopup(this.onPasswordChanged.bind(this));
+  private readonly deleteAddressPopup = DeleteAddressPopup(this.onAddressDeleted.bind(this));
 
   private readonly h2: BaseComponent<HTMLHeadingElement>;
   private readonly container: BaseComponent<HTMLDivElement>;
@@ -34,6 +52,7 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
   private readonly addAddressButton: BaseComponent<HTMLButtonElement>;
 
   private addresses: ProfileAddressComponent[] = [];
+  private addressToDelete?: string;
 
   constructor(id: string = 'profile-component', className: string = 'profile-component') {
     super(Tags.DIV, id, className);
@@ -123,7 +142,13 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
     const defaultShippingAddressId = customer.defaultShippingAddressId || '';
     const defaultBillingAddressId = customer.defaultBillingAddressId || '';
     for (const addressData of customer.addresses) {
-      const address = profileAddressComponent(undefined, 'profile-address-component', 'Address');
+      const address = profileAddressComponent(
+        undefined,
+        'profile-address-component',
+        'Address',
+        undefined,
+        this.startDeleteAddress.bind(this),
+      );
       address.appendTo(this.addressWrapper.getElement());
 
       const isDefaultShipping =
@@ -131,6 +156,7 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
       const isDefaultBilling =
         addressData.id !== undefined && addressData.id === defaultBillingAddressId;
       address.setData({
+        key: addressData.key || '',
         street: addressData.streetName || '',
         city: addressData.city || '',
         postalCode: addressData.postalCode || '',
@@ -218,6 +244,34 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
       .addAddress(addressData)
       .then(() => {
         this.renderPopupMessage('Address added', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+        this.setData();
+        PublishSubscriber().publish('userUpdated', { userId: UserCache.get()?.email || '' });
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+  }
+
+  private startDeleteAddress(addressKey: string): void {
+    this.addressToDelete = addressKey;
+
+    this.deleteAddressPopup.appendTo(this.getElement());
+    this.deleteAddressPopup.show();
+  }
+
+  private async onAddressDeleted(): Promise<void> {
+    if (!this.addressToDelete) return;
+
+    await SdkApi()
+      .deleteAddress(this.addressToDelete)
+      .then(() => {
+        this.renderPopupMessage('Address deleted', () => void 0);
       })
       .then(() => {
         return SdkApi().getMe();

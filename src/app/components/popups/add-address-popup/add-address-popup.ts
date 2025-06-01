@@ -6,17 +6,8 @@ import type BaseComponent from '@app/components/common/base-component';
 import { createButton, createDiv, createH3 } from '@app/components/common/base-component-factory';
 import { checkbox, type Checkbox } from '@app/components/common/checkbox-component';
 import { BasePopupComponent } from '@app/components/popups/popup-base';
+import type { AddressData } from '@app/components/profile/profile';
 import './add-address-popup.scss';
-
-export type AddressData = {
-  street: string;
-  city: string;
-  country: string;
-  postalCode: string;
-  key: string;
-  isDefaultBilling: boolean;
-  isDefaultSipping: boolean;
-};
 
 export class AddAddressPopupComponent extends BasePopupComponent {
   private readonly header: BaseComponent<HTMLHeadingElement>;
@@ -61,7 +52,7 @@ export class AddAddressPopupComponent extends BasePopupComponent {
         country: address.country,
         postalCode: address.postalCode || '',
         key: address.key || '',
-        isDefaultSipping: this.addressComponent.isChecked(),
+        isDefaultShipping: this.addressComponent.isChecked(),
         isDefaultBilling: this.defaultBillingCheckbox.isChecked(),
       });
       this.close();

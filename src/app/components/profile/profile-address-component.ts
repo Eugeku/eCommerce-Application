@@ -16,20 +16,12 @@ import type { RadioButton } from '@app/components/common/radio-button-component'
 import { radioButton } from '@app/components/common/radio-button-component';
 import { Tags } from '@app/components/common/tags';
 import type { BaseAddress } from '@commercetools/platform-sdk';
+import type { AddressData } from './profile';
 import { AddressBuilder } from '@/app/utils/api/bean/address-builder';
 import { coutriesPairs } from '@/app/utils/countries-pairs';
 
 const Classes = {
   HIDDEN: 'hidden',
-};
-
-export type ProfileAddressData = {
-  street: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  isDefaultShipping: boolean;
-  isDefaultBilling: boolean;
 };
 
 export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
@@ -49,14 +41,20 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
   private readonly deleteButton: BaseComponent<HTMLButtonElement>;
 
   private readonly onInputChangedCallback: (() => void) | undefined;
+  private readonly onDeleteCallback: (addressKey: string) => void;
+
+  private addressKey: string | undefined;
 
   constructor(
     id: string = 'profile-address-component',
     className: string = 'profile-address-component',
     headerText: string,
+    onDeleteCallback: (addressKey: string) => void,
     onInputChangedCallback: (() => void) | undefined,
   ) {
     super(Tags.DIV, id, className);
+
+    this.onDeleteCallback = onDeleteCallback;
     this.onInputChangedCallback = onInputChangedCallback;
 
     this.header = this.createHeader(headerText);
@@ -79,7 +77,9 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
     this.init();
   }
 
-  public setData(data: ProfileAddressData): void {
+  public setData(data: AddressData): void {
+    this.addressKey = data.key;
+
     this.streetInput.setInputValue(data.street);
     this.cityInput.setInputValue(data.city);
     this.postalCodeInput.setInputValue(data.postalCode);
@@ -163,7 +163,7 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
     });
 
     this.deleteButton.addEventListener('click', () => {
-      console.log('delete button clicked');
+      this.onDeleteCallback(this.addressKey || '');
     });
   }
 
@@ -255,5 +255,6 @@ export const profileAddressComponent = (
   className: string = 'profile-address-component',
   headerText: string,
   onInputChangedCallback: (() => void) | undefined = undefined,
+  onDeleteCallback: (addressKey: string) => void,
 ): ProfileAddressComponent =>
-  new ProfileAddressComponent(id, className, headerText, onInputChangedCallback);
+  new ProfileAddressComponent(id, className, headerText, onDeleteCallback, onInputChangedCallback);
