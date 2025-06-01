@@ -12,13 +12,15 @@ import { PersonalInfo } from './personal-info-component';
 import type { ProfileAddressComponent } from './profile-address-component';
 import { profileAddressComponent } from './profile-address-component';
 import './profile.scss';
-import { ApiPopup } from '../api-popup/api-popup';
+import { ApiPopup } from '../popups/api-popup/api-popup';
+import { ChangePasswordPopup } from '../popups/change-password-popup/change-password-popup';
 import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { UserCache } from '@/app/utils/api/token-cache';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 
 class ProfileComponent extends BaseComponent<HTMLDivElement> {
-  private readonly ApiPopup = ApiPopup();
+  private readonly apiPopup = ApiPopup();
+  private readonly changePasswordPopup = ChangePasswordPopup(this.onPasswordChanged.bind(this));
 
   private readonly h2: BaseComponent<HTMLHeadingElement>;
   private readonly container: BaseComponent<HTMLDivElement>;
@@ -35,7 +37,10 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
 
     this.h2 = createH2(undefined, 'heading-2');
     this.container = createDiv(undefined, 'profile-container');
-    this.personalInfo = PersonalInfo(this.savePersonalInfo.bind(this));
+    this.personalInfo = PersonalInfo(
+      this.savePersonalInfo.bind(this),
+      this.startChangePassword.bind(this),
+    );
     this.addressContainer = createDiv(undefined, 'address-info');
     this.addressInfoTitle = createH3(undefined, 'heading-3');
     this.addressWrapper = createDiv(undefined, 'address-wrapper');
@@ -140,7 +145,7 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
     await SdkApi()
       .updateCustomer(data)
       .then(() => {
-        this.renderPopupMessage('Profile updated', () => void 0);
+        this.renderPopupMessage('Personal Info updated', () => void 0);
       })
       .then(() => {
         return SdkApi().getMe();
@@ -167,11 +172,39 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
     }
   }
 
+  private startChangePassword(): void {
+    this.changePasswordPopup.appendTo(this.getElement());
+    this.changePasswordPopup.show();
+  }
+
+  private async onPasswordChanged(currentPassword: string, newPassword: string): Promise<void> {
+    if (currentPassword === newPassword) {
+      this.renderPopupMessage('The same password', () => void 0);
+      return;
+    }
+
+    const me = await SdkApi().getMe();
+    await SdkApi()
+      .updatePassword(currentPassword, newPassword)
+      .then(() => {
+        this.renderPopupMessage('Password updated', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().withPasswordFlow(me.body.email, newPassword).getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+  }
+
   private renderPopupMessage(message: string, callback?: () => void): void {
-    this.ApiPopup.appendTo(this.getElement());
-    this.ApiPopup.setErrorMessage(message);
-    if (callback) this.ApiPopup.onClose(callback);
-    this.ApiPopup.show();
+    this.apiPopup.appendTo(this.getElement());
+    this.apiPopup.setErrorMessage(message);
+    if (callback) this.apiPopup.onClose(callback);
+    this.apiPopup.show();
   }
 }
 

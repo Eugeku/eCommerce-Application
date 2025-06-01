@@ -62,6 +62,14 @@
         background: var(--beige);
         box-shadow: 0 0 0.7rem 0 var(--white);
 
+        &[readonly] {
+          outline: none;
+        }
+
+        &.edit {
+          outline: 2px solid #e59700;
+        }
+
         &.password {
           padding-right: 35px;
         }
@@ -149,6 +157,10 @@
       }
 
       &.edit-button {
+        margin-top: 2rem;
+      }
+
+      &.save-button {
         margin-top: 2rem;
       }
     }
@@ -247,13 +259,13 @@
           }
         }
 
-        @media (width <= 600px) {
+        @media (width <=600px) {
           grid-template-columns: repeat(1, 1fr);
         }
       }
     }
 
-    @media (width <= 900px) {
+    @media (width <=900px) {
       flex-direction: column;
     }
   }

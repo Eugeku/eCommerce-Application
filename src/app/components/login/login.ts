@@ -3,7 +3,7 @@ import { createButton, createForm, createH2 } from '@common-components/base-comp
 import { Tags } from '@common-components/tags';
 import { emailValidatingInput } from '../common/input/email-validating-input';
 import { passwordValidatingInput } from '../common/input/password-validating-input';
-import { ApiPopup } from '@/app/components/api-popup/api-popup';
+import { ApiPopup } from '../popups/api-popup/api-popup';
 import { router } from '@/app/router';
 import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { UserCache } from '@/app/utils/api/token-cache';

@@ -86,6 +86,26 @@ class CommerceSdkApi {
       .execute();
   }
 
+  public async updatePassword(
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+
+    return this.apiRoot
+      .customers()
+      .password()
+      .post({
+        body: {
+          id: me.body.id,
+          version: me.body.version,
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        },
+      })
+      .execute();
+  }
+
   public async loginUser(email: string, password: string): Promise<ClientResponse> {
     return this.apiRoot
       .login()

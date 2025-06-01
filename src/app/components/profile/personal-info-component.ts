@@ -32,6 +32,7 @@ export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
   private readonly saveButton: BaseComponent<HTMLButtonElement>;
   private readonly cancelButton: BaseComponent<HTMLButtonElement>;
   private readonly onSaveCallback: (data: PersonalInfoData) => void;
+  private readonly onChangePasswordCallback: () => void;
 
   private data: PersonalInfoData | undefined;
 
@@ -39,10 +40,12 @@ export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
     id: string = 'personal-info',
     className: string = 'personal-info',
     onSaveCallback: (data: PersonalInfoData) => void,
+    onChangePasswordCallback: () => void,
   ) {
     super(Tags.DIV, id, className);
 
     this.onSaveCallback = onSaveCallback;
+    this.onChangePasswordCallback = onChangePasswordCallback;
 
     this.personalInfoTitle = createH3(undefined, 'heading-3');
     this.firstNameInput = this.createFirstNameInput();
@@ -102,6 +105,10 @@ export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
       this.restoreData();
       this.setUneditable();
     });
+
+    this.changePasswordButton.addEventListener('click', () => {
+      this.onChangePasswordCallback();
+    });
   }
 
   protected renderComponent(): void {
@@ -131,14 +138,14 @@ export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
   private createSaveButton(): BaseComponent<HTMLButtonElement> {
     const button = createButton(undefined, 'button');
     button.setText('Save');
-    button.addClass('address-button');
+    button.addClass('save-button');
     return button;
   }
 
   private createCancelButton(): BaseComponent<HTMLButtonElement> {
     const button = createButton(undefined, 'button');
     button.setText('Cancel');
-    button.addClass('address-button');
+    button.addClass('cancel-button');
     return button;
   }
 
@@ -220,6 +227,8 @@ export class PersonalInfoComponent extends BaseComponent<HTMLDivElement> {
 
 export const PersonalInfo = (
   onSaveCallback: (data: PersonalInfoData) => void,
+  onChangePasswordCallback: () => void,
   id: string = 'personal-info',
   className: string = 'personal-info',
-): PersonalInfoComponent => new PersonalInfoComponent(id, className, onSaveCallback);
+): PersonalInfoComponent =>
+  new PersonalInfoComponent(id, className, onSaveCallback, onChangePasswordCallback);
