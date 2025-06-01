@@ -254,8 +254,41 @@
           }
 
           .address-radio-button-input {
+            cursor: pointer;
+
             width: 1rem;
             height: 1rem;
+            margin: 10px 5px 0;
+            border-radius: 50%;
+
+            appearance: none;
+            background-color: #fff;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+
+            transition:
+              color 0.15s ease-in-out,
+              background-color 0.15s ease-in-out,
+              border-color 0.15s ease-in-out,
+              box-shadow 0.15s ease-in-out;
+
+            &:disabled {
+              cursor: not-allowed;
+              opacity: 0.5;
+              filter: none;
+            }
+
+            &:checked {
+              border-color: var(--light-blue);
+              background-color: var(--light-blue);
+            }
+
+            &:disabled:checked {
+              border-color: var(--light-blue);
+              opacity: 0.5;
+              background-color: var(--light-blue);
+            }
           }
         }
 

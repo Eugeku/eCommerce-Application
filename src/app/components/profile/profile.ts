@@ -1,4 +1,8 @@
 import { Tags } from '@app/components/common/tags';
+import type { AddressData } from '@app/components/popups/add-address-popup/add-address-popup';
+import { AddAddressPopup } from '@app/components/popups/add-address-popup/add-address-popup';
+import { ApiPopup } from '@app/components/popups/api-popup/api-popup';
+import { ChangePasswordPopup } from '@app/components/popups/change-password-popup/change-password-popup';
 import type { Customer } from '@commercetools/platform-sdk';
 import BaseComponent from '@components/common/base-component';
 import {
@@ -11,15 +15,14 @@ import type { PersonalInfoComponent, PersonalInfoData } from './personal-info-co
 import { PersonalInfo } from './personal-info-component';
 import type { ProfileAddressComponent } from './profile-address-component';
 import { profileAddressComponent } from './profile-address-component';
-import './profile.scss';
-import { ApiPopup } from '../popups/api-popup/api-popup';
-import { ChangePasswordPopup } from '../popups/change-password-popup/change-password-popup';
 import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { UserCache } from '@/app/utils/api/token-cache';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
+import './profile.scss';
 
 class ProfileComponent extends BaseComponent<HTMLDivElement> {
   private readonly apiPopup = ApiPopup();
+  private readonly addAddressPopup = AddAddressPopup(this.onAddressAdded.bind(this));
   private readonly changePasswordPopup = ChangePasswordPopup(this.onPasswordChanged.bind(this));
 
   private readonly h2: BaseComponent<HTMLHeadingElement>;
@@ -54,6 +57,10 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
   protected addEventListeners(): void {
     PublishSubscriber().subscribe('userLoggedIn', () => {
       this.setData();
+    });
+
+    this.addAddressButton.addEventListener('click', () => {
+      this.startAddAddress();
     });
   }
 
@@ -194,6 +201,31 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
       })
       .then((response) => {
         UserCache.set(response.body);
+        PublishSubscriber().publish('userUpdated', { userId: UserCache.get()?.email || '' });
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+  }
+
+  private startAddAddress(): void {
+    this.addAddressPopup.appendTo(this.getElement());
+    this.addAddressPopup.show();
+  }
+
+  private async onAddressAdded(addressData: AddressData): Promise<void> {
+    await SdkApi()
+      .addAddress(addressData)
+      .then(() => {
+        this.renderPopupMessage('Address added', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+        this.setData();
+        PublishSubscriber().publish('userUpdated', { userId: UserCache.get()?.email || '' });
       })
       .catch((error) => {
         this.renderPopupMessage(error.body.message, () => void 0);

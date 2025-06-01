@@ -1,0 +1,154 @@
+.add-address-popup-component {
+  overflow: unset;
+  padding: 0;
+  border: unset;
+  background: unset;
+
+  &::backdrop {
+    backdrop-filter: blur(0.7rem);
+    transition-duration: var(--medium-speed);
+    transition-property: backdrop-filter;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+
+    padding: 1.5rem 1.5rem 2rem;
+    border: none;
+    border-radius: 1rem;
+
+    color: var(--beige);
+
+    background-image: linear-gradient(var(--blue-40), var(--cosmos-70));
+    box-shadow: 0 0 1rem 0 var(--white);
+
+    .postal-code-input,
+    .street-input,
+    .city-input,
+    .country-input {
+      position: relative;
+      width: 100%;
+      max-width: 22rem;
+      margin-bottom: 2rem;
+
+      .postal-code,
+      .street,
+      .city {
+        width: 100%;
+        height: 2rem;
+        margin-top: 0.3rem;
+        padding: 0;
+        border: none;
+        border-radius: 1rem;
+
+        font-family: Genshin, serif;
+        font-size: 1rem;
+        line-height: 2.5rem;
+        color: var(--cosmos);
+        text-indent: 0.7rem;
+
+        background: var(--beige);
+        box-shadow: 0 0 0.7rem 0 var(--white);
+      }
+
+      .tooltip {
+        position: absolute;
+        z-index: 10;
+        top: 110%;
+        right: 0;
+        left: 0;
+
+        display: flex;
+        flex-direction: column;
+
+        padding: 0.2rem;
+        border: none;
+        border-radius: 0.3rem;
+
+        font-size: 0.5rem;
+        text-shadow: none;
+        white-space: wrap;
+
+        background-color: var(--beige);
+        box-shadow: 0 0 0.3rem var(--white);
+
+        transition: opacity 0.2s ease;
+
+        .error-message {
+          color: var(--dark-red);
+        }
+
+        &.hidden {
+          display: none;
+        }
+      }
+
+      .country-select-component {
+        cursor: pointer;
+
+        width: 100%;
+        height: 2rem;
+        margin-top: 0.3rem;
+        padding: 0;
+        border: none;
+        border-radius: 1rem;
+
+        font-family: Genshin, serif;
+        font-size: 1rem;
+        line-height: 2.5rem;
+        color: var(--cosmos);
+        text-indent: 0.7rem;
+        text-shadow: none;
+
+        background: var(--beige);
+        box-shadow: 0 0 0.7rem 0 var(--white);
+      }
+    }
+
+    @media screen and (width <=320px) {
+      margin-bottom: 5rem;
+    }
+  }
+
+  .button-container {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+
+    .close-button,
+    .save-button {
+      cursor: pointer;
+
+      width: fit-content;
+      padding: 0.7rem 1rem;
+      border: none;
+      border-radius: 1rem;
+
+      font-family: Genshin, serif;
+      font-size: 1rem;
+      color: var(--beige);
+      text-shadow: 0 0 0.5rem var(--cosmos);
+
+      background-color: var(--transparent-white-15);
+      box-shadow: 0 0 0.5rem 0 var(--white);
+
+      transition:
+        background-color ease-in-out 0.4s,
+        box-shadow ease-in-out 0.4s;
+
+      &:hover {
+        background-color: var(--transparent-white-30);
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        color: var(--transparent-white-50);
+        background: var(--transparent-white-15);
+        box-shadow: 0 0 0.2rem 0 var(--white);
+      }
+    }
+  }
+}

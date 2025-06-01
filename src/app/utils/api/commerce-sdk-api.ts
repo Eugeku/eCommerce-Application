@@ -2,11 +2,13 @@ import {
   type ByProjectKeyRequestBuilder,
   createApiBuilderFromCtpClient,
   type Customer,
+  type MyCustomerUpdateAction,
 } from '@commercetools/platform-sdk';
 import { type ClientResponse } from '@commercetools/ts-client';
 import { CustomerBuilder } from '@utils/api/bean/customer-builder';
 import { ApiClient } from '@utils/api/build-client';
 import { clearTokens, UserCache } from '@utils/api/token-cache';
+import type { AddressData } from '@/app/components/popups/add-address-popup/add-address-popup';
 import type { PersonalInfoData } from '@/app/components/profile/personal-info-component';
 
 class CommerceSdkApi {
@@ -81,6 +83,47 @@ class CommerceSdkApi {
               dateOfBirth: data.dateOfBirth,
             },
           ],
+        },
+      })
+      .execute();
+  }
+
+  public async addAddress(data: AddressData): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+
+    const actions: MyCustomerUpdateAction[] = [
+      {
+        action: 'addAddress',
+        address: {
+          key: data.key,
+          streetName: data.street,
+          city: data.city,
+          country: data.country,
+          postalCode: data.postalCode,
+        },
+      },
+    ];
+
+    if (data.isDefaultSipping) {
+      actions.push({
+        action: 'setDefaultShippingAddress',
+        addressKey: data.key,
+      });
+    }
+
+    if (data.isDefaultBilling) {
+      actions.push({
+        action: 'setDefaultBillingAddress',
+        addressKey: data.key,
+      });
+    }
+
+    return this.apiRoot
+      .me()
+      .post({
+        body: {
+          version: me.body.version,
+          actions: actions,
         },
       })
       .execute();

@@ -1,5 +1,4 @@
 import { CountrySelect } from '@app/components/common/address-component/country-select-component';
-import type { CountrySelectOptionPair } from '@app/components/common/address-component/country-select-component';
 import BaseComponent from '@app/components/common/base-component';
 import {
   createButton,
@@ -18,6 +17,7 @@ import { radioButton } from '@app/components/common/radio-button-component';
 import { Tags } from '@app/components/common/tags';
 import type { BaseAddress } from '@commercetools/platform-sdk';
 import { AddressBuilder } from '@/app/utils/api/bean/address-builder';
+import { coutriesPairs } from '@/app/utils/countries-pairs';
 
 const Classes = {
   HIDDEN: 'hidden',
@@ -33,10 +33,6 @@ export type ProfileAddressData = {
 };
 
 export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
-  private readonly coutriesPairs: Array<CountrySelectOptionPair> = [
-    { value: 'US', text: 'United States' },
-  ];
-
   private readonly header: BaseComponent<HTMLHeadingElement>;
   private readonly streetInput: StreetValidatingInput;
   private readonly cityInput: CityValidatingInput;
@@ -213,7 +209,7 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private createCountrySelect(): CountrySelect {
-    return new CountrySelect(this.coutriesPairs, this.onInputChangedCallback);
+    return new CountrySelect(coutriesPairs, this.onInputChangedCallback);
   }
 
   private createRadioContainer(): BaseComponent<HTMLDivElement> {
