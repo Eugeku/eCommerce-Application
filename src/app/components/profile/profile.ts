@@ -1,4 +1,9 @@
 import { Tags } from '@app/components/common/tags';
+import { AddAddressPopup } from '@app/components/popups/add-address-popup/add-address-popup';
+import { ApiPopup } from '@app/components/popups/api-popup/api-popup';
+import { ChangePasswordPopup } from '@app/components/popups/change-password-popup/change-password-popup';
+import { DeleteAddressPopup } from '@app/components/popups/delete-address-popup/delete-address-popup';
+import type { Customer } from '@commercetools/platform-sdk';
 import BaseComponent from '@components/common/base-component';
 import {
   createButton,
@@ -10,9 +15,35 @@ import type { PersonalInfoComponent } from './personal-info-component';
 import { PersonalInfo } from './personal-info-component';
 import type { ProfileAddressComponent } from './profile-address-component';
 import { profileAddressComponent } from './profile-address-component';
+import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
+import { UserCache } from '@/app/utils/api/token-cache';
+import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 import './profile.scss';
 
+export type PersonalInfoData = {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  email: string;
+};
+
+export type AddressData = {
+  id?: string;
+  key?: string;
+  street: string;
+  city: string;
+  country: string;
+  postalCode: string;
+  isDefaultBilling: boolean;
+  isDefaultShipping: boolean;
+};
+
 class ProfileComponent extends BaseComponent<HTMLDivElement> {
+  private readonly apiPopup = ApiPopup();
+  private readonly addAddressPopup = AddAddressPopup(this.onAddressAdded.bind(this));
+  private readonly changePasswordPopup = ChangePasswordPopup(this.onPasswordChanged.bind(this));
+  private readonly deleteAddressPopup = DeleteAddressPopup(this.onAddressDeleted.bind(this));
+
   private readonly h2: BaseComponent<HTMLHeadingElement>;
   private readonly container: BaseComponent<HTMLDivElement>;
   private readonly personalInfo: PersonalInfoComponent;
@@ -21,29 +52,37 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
   private readonly addressWrapper: BaseComponent<HTMLDivElement>;
   private readonly addAddressButton: BaseComponent<HTMLButtonElement>;
 
-  private address1: ProfileAddressComponent;
-  private address2: ProfileAddressComponent;
+  private addresses: ProfileAddressComponent[] = [];
+  private addressToDelete?: string;
 
   constructor(id: string = 'profile-component', className: string = 'profile-component') {
     super(Tags.DIV, id, className);
 
     this.h2 = createH2(undefined, 'heading-2');
     this.container = createDiv(undefined, 'profile-container');
-    this.personalInfo = PersonalInfo();
+    this.personalInfo = PersonalInfo(
+      this.savePersonalInfo.bind(this),
+      this.startChangePassword.bind(this),
+    );
     this.addressContainer = createDiv(undefined, 'address-info');
     this.addressInfoTitle = createH3(undefined, 'heading-3');
     this.addressWrapper = createDiv(undefined, 'address-wrapper');
     this.addAddressButton = this.createAddAddressButton();
 
-    this.address1 = profileAddressComponent(undefined, 'profile-address-component', 'Address');
-    this.address2 = profileAddressComponent(undefined, 'profile-address-component', 'Address');
-
-    this.setAddresses();
-
     this.init();
+
+    this.setData();
   }
 
-  protected addEventListeners(): void {}
+  protected addEventListeners(): void {
+    PublishSubscriber().subscribe('userLoggedIn', () => {
+      this.setData();
+    });
+
+    this.addAddressButton.addEventListener('click', () => {
+      this.startAddAddress();
+    });
+  }
 
   protected renderComponent(): void {
     this.renderH2();
@@ -53,9 +92,6 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
     this.renderAddressInfoTitle();
     this.addressWrapper.appendTo(this.addressContainer.getElement());
     this.addAddressButton.appendTo(this.addressContainer.getElement());
-
-    this.address1.appendTo(this.addressWrapper.getElement());
-    this.address2.appendTo(this.addressWrapper.getElement());
   }
 
   private renderH2(): void {
@@ -79,12 +115,206 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
     return addAddressButton;
   }
 
-  private setAddresses(): void {
-    this.address1.setData();
-    this.address2.setData();
+  private async setData(): Promise<void> {
+    const customer = UserCache.get();
 
-    this.address1.setUneditable();
-    this.address2.setUneditable();
+    if (customer) {
+      this.setPersonalInfo(customer);
+      this.setAddresses(customer);
+    }
+  }
+
+  private setPersonalInfo(customer: Customer): void {
+    this.personalInfo.setData({
+      firstName: customer.firstName || '',
+      lastName: customer.lastName || '',
+      dateOfBirth: customer.dateOfBirth || '',
+      email: customer.email,
+    });
+    this.personalInfo.setUneditable();
+  }
+
+  private setAddresses(customer: Customer): void {
+    for (const address of this.addresses) {
+      address.remove();
+    }
+    this.addresses = [];
+
+    const defaultShippingAddressId = customer.defaultShippingAddressId || '';
+    const defaultBillingAddressId = customer.defaultBillingAddressId || '';
+    for (const addressData of customer.addresses) {
+      const address = profileAddressComponent(
+        undefined,
+        'profile-address-component',
+        'Address',
+        undefined,
+        this.onAddressChanged.bind(this),
+        this.setData.bind(this),
+        this.startDeleteAddress.bind(this),
+      );
+      address.appendTo(this.addressWrapper.getElement());
+
+      const isDefaultShipping =
+        addressData.id !== undefined && addressData.id === defaultShippingAddressId;
+      const isDefaultBilling =
+        addressData.id !== undefined && addressData.id === defaultBillingAddressId;
+
+      address.setData({
+        id: addressData.id,
+        key: addressData.key,
+        street: addressData.streetName || '',
+        city: addressData.city || '',
+        postalCode: addressData.postalCode || '',
+        country: addressData.country,
+        isDefaultShipping: isDefaultShipping,
+        isDefaultBilling: isDefaultBilling,
+      });
+      address.setUneditable();
+
+      this.addresses.push(address);
+    }
+  }
+
+  private async savePersonalInfo(data: PersonalInfoData): Promise<void> {
+    this.personalInfo.setUneditable();
+
+    if (!dataChanged(data)) return;
+
+    await SdkApi()
+      .updateCustomer(data)
+      .then(() => {
+        this.renderPopupMessage('Personal Info updated', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+        this.setData();
+        PublishSubscriber().publish('userUpdated', { userId: data.email });
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+
+    function dataChanged(data: PersonalInfoData): boolean {
+      const customer = UserCache.get();
+      if (!customer) return false;
+
+      return (
+        data.email !== customer.email ||
+        data.firstName !== customer.firstName ||
+        data.lastName !== customer.lastName ||
+        data.dateOfBirth !== customer.dateOfBirth
+      );
+    }
+  }
+
+  private startChangePassword(): void {
+    this.changePasswordPopup.appendTo(this.getElement());
+    this.changePasswordPopup.show();
+  }
+
+  private async onPasswordChanged(currentPassword: string, newPassword: string): Promise<void> {
+    if (currentPassword === newPassword) {
+      this.renderPopupMessage('The same password', () => void 0);
+      return;
+    }
+
+    const me = await SdkApi().getMe();
+    await SdkApi()
+      .updatePassword(currentPassword, newPassword)
+      .then(() => {
+        this.renderPopupMessage('Password updated', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().withPasswordFlow(me.body.email, newPassword).getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+        PublishSubscriber().publish('userUpdated', { userId: UserCache.get()?.email || '' });
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+  }
+
+  private startAddAddress(): void {
+    this.addAddressPopup.appendTo(this.getElement());
+    this.addAddressPopup.show();
+  }
+
+  private async onAddressAdded(addressData: AddressData): Promise<void> {
+    await SdkApi()
+      .addAddress(addressData)
+      .then(() => {
+        this.renderPopupMessage('Address added', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+        this.setData();
+        PublishSubscriber().publish('userUpdated', { userId: UserCache.get()?.email || '' });
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+  }
+
+  private startDeleteAddress(addressId: string): void {
+    this.addressToDelete = addressId;
+
+    this.deleteAddressPopup.appendTo(this.getElement());
+    this.deleteAddressPopup.show();
+  }
+
+  private async onAddressDeleted(): Promise<void> {
+    if (!this.addressToDelete) return;
+
+    await SdkApi()
+      .deleteAddress(this.addressToDelete)
+      .then(() => {
+        this.renderPopupMessage('Address deleted', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+        this.setData();
+        PublishSubscriber().publish('userUpdated', { userId: UserCache.get()?.email || '' });
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+  }
+
+  private async onAddressChanged(data: AddressData): Promise<void> {
+    await SdkApi()
+      .changeAddress(data)
+      .then(() => {
+        this.renderPopupMessage('Address changed', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+        this.setData();
+        PublishSubscriber().publish('userUpdated', { userId: UserCache.get()?.email || '' });
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+  }
+
+  private renderPopupMessage(message: string, callback?: () => void): void {
+    this.apiPopup.appendTo(this.getElement());
+    this.apiPopup.setErrorMessage(message);
+    if (callback) this.apiPopup.onClose(callback);
+    this.apiPopup.show();
   }
 }
 

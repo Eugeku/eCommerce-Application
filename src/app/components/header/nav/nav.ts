@@ -78,7 +78,7 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private addLoginEventListener(): void {
-    PublishSubscriber().subscribe('userLoggedIn', (payload) => {
+    PublishSubscriber().subscribe('userLoggedIn', () => {
       this.renderLoginLogout(true);
     });
   }

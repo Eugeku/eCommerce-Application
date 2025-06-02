@@ -22,6 +22,12 @@ export class PasswordValidatingInput extends BaseValidatingInputComponent {
     this.init();
   }
 
+  public setPasswordVisible(state: boolean): void {
+    this.input.getElement().type = state ? InputType.TEXT : InputType.PASSWORD;
+    this.passwordControl.removeChildren();
+    this.passwordControl?.getElement().insertAdjacentHTML('afterbegin', state ? eyeOpen : eyeClose);
+  }
+
   protected addEventListeners(): void {
     super.addEventListeners();
     this.addEventListenerPasswordControl();
@@ -52,11 +58,7 @@ export class PasswordValidatingInput extends BaseValidatingInputComponent {
   private addEventListenerPasswordControl(): void {
     this.passwordControl.addEventListener('click', () => {
       this.isPasswordVisible = !this.isPasswordVisible;
-      this.input.getElement().type = this.isPasswordVisible ? InputType.TEXT : InputType.PASSWORD;
-      this.passwordControl.removeChildren();
-      this.passwordControl
-        ?.getElement()
-        .insertAdjacentHTML('afterbegin', this.isPasswordVisible ? eyeOpen : eyeClose);
+      this.setPasswordVisible(this.isPasswordVisible);
     });
   }
 

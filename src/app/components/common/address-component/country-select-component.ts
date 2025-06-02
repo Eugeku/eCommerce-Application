@@ -1,11 +1,7 @@
-import BaseComponent from '../base-component';
-import { createOption } from '../base-component-factory';
-import { Tags } from '../tags';
-
-export type CountrySelectOptionPair = {
-  value: string;
-  text: string;
-};
+import BaseComponent from '@app/components/common/base-component';
+import { createOption } from '@app/components/common/base-component-factory';
+import { Tags } from '@app/components/common/tags';
+import type { CountrySelectOptionPair } from '@/app/utils/countries-pairs';
 
 export class CountrySelect extends BaseComponent<HTMLSelectElement> {
   private readonly onSelectChangedCallback: (() => void) | undefined;
@@ -31,6 +27,14 @@ export class CountrySelect extends BaseComponent<HTMLSelectElement> {
 
   public getValue(): string {
     return this.getElement().value || '';
+  }
+
+  public setValue(value: string): void {
+    this.getElement().value = value;
+  }
+
+  public reset(): void {
+    this.getElement().value = this.optionPairs[0].getElement().value;
   }
 
   protected renderComponent(): void {
