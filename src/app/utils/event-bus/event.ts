@@ -8,4 +8,6 @@ export type AppEvents = {
   searchText: { text: string };
   sort: { text: string };
   pagination: { page: number };
+  openModalSlider: object;
+  closeModalSlider: object;
 };
