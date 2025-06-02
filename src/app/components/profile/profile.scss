@@ -67,7 +67,7 @@
         }
 
         &.edit {
-          outline: 2px solid #e59700;
+          outline: 0.1rem solid var(--orange);
         }
 
         &.password {
@@ -246,6 +246,7 @@
             text-shadow: none;
 
             background: var(--beige);
+            outline: 0.1rem solid var(--orange);
             box-shadow: 0 0 0.7rem 0 var(--white);
 
             &:disabled {
@@ -256,6 +257,7 @@
 
               opacity: 1;
               background-color: var(--beige);
+              outline: none;
             }
           }
 
