@@ -38,22 +38,29 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
   private readonly buttonsContainer: BaseComponent<HTMLDivElement>;
   private readonly editButton: BaseComponent<HTMLButtonElement>;
   private readonly saveButton: BaseComponent<HTMLButtonElement>;
+  private readonly cancelButton: BaseComponent<HTMLButtonElement>;
   private readonly deleteButton: BaseComponent<HTMLButtonElement>;
 
   private readonly onInputChangedCallback: (() => void) | undefined;
+  private readonly onSaveCallback: (data: AddressData) => void;
+  private readonly onCancelCallback: () => void;
   private readonly onDeleteCallback: (addressKey: string) => void;
 
-  private addressKey: string | undefined;
+  private data: AddressData | undefined;
 
   constructor(
     id: string = 'profile-address-component',
     className: string = 'profile-address-component',
     headerText: string,
+    onSaveCallback: (data: AddressData) => void,
+    onCancelCallback: () => void,
     onDeleteCallback: (addressKey: string) => void,
     onInputChangedCallback: (() => void) | undefined,
   ) {
     super(Tags.DIV, id, className);
 
+    this.onSaveCallback = onSaveCallback;
+    this.onCancelCallback = onCancelCallback;
     this.onDeleteCallback = onDeleteCallback;
     this.onInputChangedCallback = onInputChangedCallback;
 
@@ -72,34 +79,35 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
     this.buttonsContainer = this.createButtonsContainer();
     this.editButton = this.createEditButton();
     this.saveButton = this.createSaveButton();
+    this.cancelButton = this.createCancelButton();
     this.deleteButton = this.createDeleteButton();
 
     this.init();
   }
 
   public setData(data: AddressData): void {
-    this.addressKey = data.key;
-
-    this.streetInput.setInputValue(data.street);
-    this.cityInput.setInputValue(data.city);
-    this.postalCodeInput.setInputValue(data.postalCode);
-    this.countrySelect.setValue(data.country);
-    this.shippingRadioButton.setChecked(data.isDefaultShipping);
-    this.billingRadioButton.setChecked(data.isDefaultBilling);
+    this.data = data;
+    this.restoreData();
   }
 
   public setEditable(): void {
     this.setActive(true);
 
     this.editButton.addClass(Classes.HIDDEN);
+    this.deleteButton.addClass(Classes.HIDDEN);
+
     this.saveButton.removeClass(Classes.HIDDEN);
+    this.cancelButton.removeClass(Classes.HIDDEN);
   }
 
   public setUneditable(): void {
     this.setActive(false);
 
     this.editButton.removeClass(Classes.HIDDEN);
+    this.deleteButton.removeClass(Classes.HIDDEN);
+
     this.saveButton.addClass(Classes.HIDDEN);
+    this.cancelButton.addClass(Classes.HIDDEN);
   }
 
   public setActive(state: boolean): void {
@@ -150,20 +158,26 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
     this.buttonsContainer.appendTo(this.getElement());
     this.editButton.appendTo(this.buttonsContainer.getElement());
     this.saveButton.appendTo(this.buttonsContainer.getElement());
+    this.cancelButton.appendTo(this.buttonsContainer.getElement());
     this.deleteButton.appendTo(this.buttonsContainer.getElement());
   }
 
   protected addEventListeners(): void {
-    this.saveButton.addEventListener('click', () => {
-      this.setUneditable();
-    });
-
     this.editButton.addEventListener('click', () => {
       this.setEditable();
     });
 
+    this.saveButton.addEventListener('click', () => {
+      this.onSave();
+    });
+
+    this.cancelButton.addEventListener('click', () => {
+      this.setUneditable();
+      this.onCancelCallback();
+    });
+
     this.deleteButton.addEventListener('click', () => {
-      this.onDeleteCallback(this.addressKey || '');
+      this.onDeleteCallback(this.data?.id || '');
     });
   }
 
@@ -242,11 +256,49 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
     return button;
   }
 
+  private createCancelButton(): BaseComponent<HTMLButtonElement> {
+    const button = createButton(undefined, 'button');
+    button.setText('Cancel');
+    button.addClass('cancel-button');
+    return button;
+  }
+
   private createDeleteButton(): BaseComponent<HTMLButtonElement> {
     const button = createButton(undefined, 'button');
     button.setText('Delete');
     button.addClass('address-button');
     return button;
+  }
+
+  private onSave(): void {
+    const street = this.streetInput.getInputValue();
+    const city = this.cityInput.getInputValue();
+    const postalCode = this.postalCodeInput.getInputValue();
+    const country = this.countrySelect.getValue();
+    const isDefaultBilling = this.billingRadioButton.isChecked();
+    const isDefaultShipping = this.shippingRadioButton.isChecked();
+
+    this.onSaveCallback({
+      id: this.data?.id,
+      key: this.data?.key,
+      street: street,
+      city: city,
+      country: country,
+      postalCode: postalCode,
+      isDefaultBilling: isDefaultBilling,
+      isDefaultShipping: isDefaultShipping,
+    });
+  }
+
+  private restoreData(): void {
+    if (!this.data) return;
+
+    this.streetInput.setInputValue(this.data.street);
+    this.cityInput.setInputValue(this.data.city);
+    this.postalCodeInput.setInputValue(this.data.postalCode);
+    this.countrySelect.setValue(this.data.country);
+    this.shippingRadioButton.setChecked(this.data.isDefaultShipping);
+    this.billingRadioButton.setChecked(this.data.isDefaultBilling);
   }
 }
 
@@ -255,6 +307,16 @@ export const profileAddressComponent = (
   className: string = 'profile-address-component',
   headerText: string,
   onInputChangedCallback: (() => void) | undefined = undefined,
+  onSaveCallback: (data: AddressData) => void,
+  onCancelCallback: () => void,
   onDeleteCallback: (addressKey: string) => void,
 ): ProfileAddressComponent =>
-  new ProfileAddressComponent(id, className, headerText, onDeleteCallback, onInputChangedCallback);
+  new ProfileAddressComponent(
+    id,
+    className,
+    headerText,
+    onSaveCallback,
+    onCancelCallback,
+    onDeleteCallback,
+    onInputChangedCallback,
+  );

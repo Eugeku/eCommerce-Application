@@ -28,7 +28,8 @@ export type PersonalInfoData = {
 };
 
 export type AddressData = {
-  key: string;
+  id?: string;
+  key?: string;
   street: string;
   city: string;
   country: string;
@@ -147,6 +148,8 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
         'profile-address-component',
         'Address',
         undefined,
+        this.onAddressChanged.bind(this),
+        this.setData.bind(this),
         this.startDeleteAddress.bind(this),
       );
       address.appendTo(this.addressWrapper.getElement());
@@ -155,8 +158,10 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
         addressData.id !== undefined && addressData.id === defaultShippingAddressId;
       const isDefaultBilling =
         addressData.id !== undefined && addressData.id === defaultBillingAddressId;
+
       address.setData({
-        key: addressData.key || '',
+        id: addressData.id,
+        key: addressData.key,
         street: addressData.streetName || '',
         city: addressData.city || '',
         postalCode: addressData.postalCode || '',
@@ -258,8 +263,8 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
       });
   }
 
-  private startDeleteAddress(addressKey: string): void {
-    this.addressToDelete = addressKey;
+  private startDeleteAddress(addressId: string): void {
+    this.addressToDelete = addressId;
 
     this.deleteAddressPopup.appendTo(this.getElement());
     this.deleteAddressPopup.show();
@@ -272,6 +277,25 @@ class ProfileComponent extends BaseComponent<HTMLDivElement> {
       .deleteAddress(this.addressToDelete)
       .then(() => {
         this.renderPopupMessage('Address deleted', () => void 0);
+      })
+      .then(() => {
+        return SdkApi().getMe();
+      })
+      .then((response) => {
+        UserCache.set(response.body);
+        this.setData();
+        PublishSubscriber().publish('userUpdated', { userId: UserCache.get()?.email || '' });
+      })
+      .catch((error) => {
+        this.renderPopupMessage(error.body.message, () => void 0);
+      });
+  }
+
+  private async onAddressChanged(data: AddressData): Promise<void> {
+    await SdkApi()
+      .changeAddress(data)
+      .then(() => {
+        this.renderPopupMessage('Address changed', () => void 0);
       })
       .then(() => {
         return SdkApi().getMe();

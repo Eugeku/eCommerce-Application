@@ -157,11 +157,11 @@
       }
 
       &.edit-button {
-        margin-top: 2rem;
+        margin-top: 2.8rem;
       }
 
       &.save-button {
-        margin-top: 2rem;
+        margin-top: 2.8rem;
       }
     }
 
@@ -193,6 +193,7 @@
       flex-direction: column;
       align-items: center;
 
+      min-width: 35rem;
       padding: 1rem;
       border: none;
       border-radius: 1rem;
@@ -280,21 +281,31 @@
             }
 
             &:checked {
-              border-color: var(--light-blue);
-              background-color: var(--light-blue);
+              border-color: var(--yellow);
+              background-color: var(--yellow);
             }
 
             &:disabled:checked {
-              border-color: var(--light-blue);
-              opacity: 0.5;
-              background-color: var(--light-blue);
+              border-color: var(--yellow);
+              opacity: 0.7;
+              background-color: var(--yellow);
             }
+          }
+
+          .address-buttons-container {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
           }
         }
 
         @media (width <=600px) {
           grid-template-columns: repeat(1, 1fr);
         }
+      }
+
+      @media (width <=600px) {
+        min-width: 100px;
       }
     }
 

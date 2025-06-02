@@ -1,8 +1,8 @@
-import type BaseComponent from '../../common/base-component';
-import { createButton, createDiv, createH3 } from '../../common/base-component-factory';
-import type { PasswordValidatingInput } from '../../common/input/password-validating-input';
-import { passwordValidatingInput } from '../../common/input/password-validating-input';
-import { BasePopupComponent } from '../popup-base';
+import type BaseComponent from '@app/components/common/base-component';
+import { createButton, createDiv, createH3 } from '@app/components/common/base-component-factory';
+import type { PasswordValidatingInput } from '@app/components/common/input/password-validating-input';
+import { passwordValidatingInput } from '@app/components/common/input/password-validating-input';
+import { BasePopupComponent } from '@app/components/popups/popup-base';
 import './change-password-popup.scss';
 
 export class ChangePasswordPopupComponent extends BasePopupComponent {

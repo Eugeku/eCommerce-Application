@@ -128,7 +128,7 @@ class CommerceSdkApi {
       .execute();
   }
 
-  public async deleteAddress(key: string): Promise<ClientResponse> {
+  public async deleteAddress(id: string): Promise<ClientResponse> {
     const me = await this.apiRoot.me().get().execute();
 
     return this.apiRoot
@@ -139,7 +139,7 @@ class CommerceSdkApi {
           actions: [
             {
               action: 'removeAddress',
-              addressKey: key,
+              addressId: id,
             },
           ],
         },
@@ -215,6 +215,88 @@ class CommerceSdkApi {
     const user = UserCache.get();
 
     return token && token.expirationTime > now && user !== undefined;
+  }
+
+  public async changeAddress(data: AddressData): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+    const defaultShippingId = me.body.defaultShippingAddressId;
+    const defualtBillingId = me.body.defaultBillingAddressId;
+
+    const actions: MyCustomerUpdateAction[] = this.getChangeAddressActions(
+      data,
+      defaultShippingId,
+      defualtBillingId,
+    );
+
+    return this.apiRoot
+      .me()
+      .post({
+        body: {
+          version: me.body.version,
+          actions: actions,
+        },
+      })
+      .execute();
+  }
+
+  private getChangeAddressActions(
+    data: AddressData,
+    defaultShippingId: string | undefined,
+    defualtBillingId: string | undefined,
+  ): MyCustomerUpdateAction[] {
+    const actions: MyCustomerUpdateAction[] = [
+      {
+        action: 'changeAddress',
+        addressId: data.id,
+        address: {
+          streetName: data.street,
+          city: data.city,
+          country: data.country,
+          postalCode: data.postalCode,
+        },
+      },
+    ];
+
+    this.pushSetDefaultShippingActionForChangeAddress(actions, defaultShippingId, data);
+    this.pushSetDefaultBillingActionForChangeAddress(actions, defualtBillingId, data);
+
+    return actions;
+  }
+
+  private pushSetDefaultShippingActionForChangeAddress(
+    actions: MyCustomerUpdateAction[],
+    defaultShippingId: string | undefined,
+    data: AddressData,
+  ): void {
+    if (data.isDefaultShipping && defaultShippingId !== data.id) {
+      actions.push({
+        action: 'setDefaultShippingAddress',
+        addressId: data.id,
+      });
+    } else if (!data.isDefaultShipping && defaultShippingId === data.id) {
+      actions.push({
+        action: 'setDefaultShippingAddress',
+        addressId: undefined,
+      });
+    }
+  }
+
+  private pushSetDefaultBillingActionForChangeAddress(
+    actions: MyCustomerUpdateAction[],
+    defualtBillingId: string | undefined,
+    data: AddressData,
+  ): void {
+    if (data.isDefaultBilling && defualtBillingId !== data.id) {
+      actions.push({
+        action: 'setDefaultBillingAddress',
+        addressId: data.id,
+      });
+    } else if (!data.isDefaultBilling && defualtBillingId === data.id) {
+      actions.push({
+        action: 'setDefaultBillingAddress',
+        addressId: undefined,
+      });
+    }
   }
 
   private initializeSession(): void {

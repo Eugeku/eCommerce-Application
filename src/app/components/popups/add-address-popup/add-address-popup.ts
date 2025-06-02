@@ -46,6 +46,7 @@ export class AddAddressPopupComponent extends BasePopupComponent {
 
     this.saveButton.addEventListener('click', () => {
       const address = this.addressComponent.getAddress();
+
       this.onAddressAdded({
         street: address.streetName || '',
         city: address.city || '',
