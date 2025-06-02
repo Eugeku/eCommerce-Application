@@ -17,6 +17,7 @@ class App {
   public start(): void {
     this.pageWrapper.appendTo(this.root.getElement());
     this.setupRoutes();
+    this.setAdditionalRoutes();
     router.handleInitialRoute();
   }
 
@@ -67,6 +68,13 @@ class App {
 
     router.addRoute('*', () => {
       this.pageWrapper.openNotFound();
+    });
+  }
+
+  public setAdditionalRoutes(): void {
+    const productName = 'product-name';
+    router.addRoute(`#/product/${productName}`, () => {
+      this.pageWrapper.openProduct();
     });
   }
 }
