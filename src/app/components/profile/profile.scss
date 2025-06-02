@@ -261,7 +261,8 @@
 
           .address-radio-button-text {
             display: flex;
-            gap: 0.2rem;
+            gap: 0.5rem;
+            align-items: center;
             padding: 0.5rem 0;
           }
 
@@ -270,11 +271,10 @@
 
             width: 1rem;
             height: 1rem;
-            margin: 10px 5px 0;
             border-radius: 50%;
 
             appearance: none;
-            background-color: #fff;
+            background-color: var(--beige);
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
@@ -292,14 +292,14 @@
             }
 
             &:checked {
-              border-color: var(--yellow);
-              background-color: var(--yellow);
+              border: 0.2rem solid var(--orange);
+              background-color: var(--gold);
             }
 
             &:disabled:checked {
-              border-color: var(--yellow);
+              border: 0.2rem solid var(--gold);
               opacity: 0.7;
-              background-color: var(--yellow);
+              background-color: var(--gold);
             }
           }
 
