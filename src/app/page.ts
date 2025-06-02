@@ -8,6 +8,7 @@ import { ModalSlider } from './components/modal-slider/modal-slider';
 import { ProductPage } from './components/product-page/product-page';
 import { Profile } from './components/profile/profile';
 import { Registration } from './components/registration/registration';
+import { Store } from './components/store/store';
 import { PlaceholderPage } from './components/under-construction/under-construction';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 import './page.scss';
@@ -19,6 +20,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   private readonly login = Login();
   private readonly registration = Registration();
   private readonly placeholder = PlaceholderPage();
+  private readonly store = Store();
   private readonly profile = Profile();
   private readonly product = ProductPage();
   private readonly modalSlider = ModalSlider();
@@ -38,7 +40,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   }
 
   public openStore(): void {
-    this.renderAllComponentsExcept(this.placeholder);
+    this.renderAllComponentsExcept(this.store);
   }
 
   public openAboutUs(): void {
@@ -100,6 +102,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
     this.placeholder.remove();
     this.profile.remove();
     this.product.remove();
+    this.store.remove();
     component.appendTo(this.getElement());
     // append footer
   }

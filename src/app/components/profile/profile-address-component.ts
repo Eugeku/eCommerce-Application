@@ -1,5 +1,4 @@
 import { CountrySelect } from '@app/components/common/address-component/country-select-component';
-import type { CountrySelectOptionPair } from '@app/components/common/address-component/country-select-component';
 import BaseComponent from '@app/components/common/base-component';
 import {
   createButton,
@@ -17,17 +16,15 @@ import type { RadioButton } from '@app/components/common/radio-button-component'
 import { radioButton } from '@app/components/common/radio-button-component';
 import { Tags } from '@app/components/common/tags';
 import type { BaseAddress } from '@commercetools/platform-sdk';
+import type { AddressData } from './profile';
 import { AddressBuilder } from '@/app/utils/api/bean/address-builder';
+import { coutriesPairs } from '@/app/utils/countries-pairs';
 
 const Classes = {
   HIDDEN: 'hidden',
 };
 
 export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
-  private readonly coutriesPairs: Array<CountrySelectOptionPair> = [
-    { value: 'US', text: 'United States' },
-  ];
-
   private readonly header: BaseComponent<HTMLHeadingElement>;
   private readonly streetInput: StreetValidatingInput;
   private readonly cityInput: CityValidatingInput;
@@ -41,17 +38,30 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
   private readonly buttonsContainer: BaseComponent<HTMLDivElement>;
   private readonly editButton: BaseComponent<HTMLButtonElement>;
   private readonly saveButton: BaseComponent<HTMLButtonElement>;
+  private readonly cancelButton: BaseComponent<HTMLButtonElement>;
   private readonly deleteButton: BaseComponent<HTMLButtonElement>;
 
   private readonly onInputChangedCallback: (() => void) | undefined;
+  private readonly onSaveCallback: (data: AddressData) => void;
+  private readonly onCancelCallback: () => void;
+  private readonly onDeleteCallback: (addressKey: string) => void;
+
+  private data: AddressData | undefined;
 
   constructor(
     id: string = 'profile-address-component',
     className: string = 'profile-address-component',
     headerText: string,
+    onSaveCallback: (data: AddressData) => void,
+    onCancelCallback: () => void,
+    onDeleteCallback: (addressKey: string) => void,
     onInputChangedCallback: (() => void) | undefined,
   ) {
     super(Tags.DIV, id, className);
+
+    this.onSaveCallback = onSaveCallback;
+    this.onCancelCallback = onCancelCallback;
+    this.onDeleteCallback = onDeleteCallback;
     this.onInputChangedCallback = onInputChangedCallback;
 
     this.header = this.createHeader(headerText);
@@ -69,29 +79,35 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
     this.buttonsContainer = this.createButtonsContainer();
     this.editButton = this.createEditButton();
     this.saveButton = this.createSaveButton();
+    this.cancelButton = this.createCancelButton();
     this.deleteButton = this.createDeleteButton();
 
     this.init();
   }
 
-  public setData(): void {
-    this.streetInput.setInputValue('some street');
-    this.cityInput.setInputValue('some city');
-    this.postalCodeInput.setInputValue('12345');
+  public setData(data: AddressData): void {
+    this.data = data;
+    this.restoreData();
   }
 
   public setEditable(): void {
     this.setActive(true);
 
     this.editButton.addClass(Classes.HIDDEN);
+    this.deleteButton.addClass(Classes.HIDDEN);
+
     this.saveButton.removeClass(Classes.HIDDEN);
+    this.cancelButton.removeClass(Classes.HIDDEN);
   }
 
   public setUneditable(): void {
     this.setActive(false);
 
     this.editButton.removeClass(Classes.HIDDEN);
+    this.deleteButton.removeClass(Classes.HIDDEN);
+
     this.saveButton.addClass(Classes.HIDDEN);
+    this.cancelButton.addClass(Classes.HIDDEN);
   }
 
   public setActive(state: boolean): void {
@@ -142,22 +158,26 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
     this.buttonsContainer.appendTo(this.getElement());
     this.editButton.appendTo(this.buttonsContainer.getElement());
     this.saveButton.appendTo(this.buttonsContainer.getElement());
+    this.cancelButton.appendTo(this.buttonsContainer.getElement());
     this.deleteButton.appendTo(this.buttonsContainer.getElement());
   }
 
   protected addEventListeners(): void {
-    this.saveButton.addEventListener('click', () => {
-      this.setUneditable();
-      console.log('save button clicked');
-    });
-
     this.editButton.addEventListener('click', () => {
       this.setEditable();
-      console.log('edit button clicked');
+    });
+
+    this.saveButton.addEventListener('click', () => {
+      this.onSave();
+    });
+
+    this.cancelButton.addEventListener('click', () => {
+      this.setUneditable();
+      this.onCancelCallback();
     });
 
     this.deleteButton.addEventListener('click', () => {
-      console.log('delete button clicked');
+      this.onDeleteCallback(this.data?.id || '');
     });
   }
 
@@ -203,7 +223,7 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private createCountrySelect(): CountrySelect {
-    return new CountrySelect(this.coutriesPairs, this.onInputChangedCallback);
+    return new CountrySelect(coutriesPairs, this.onInputChangedCallback);
   }
 
   private createRadioContainer(): BaseComponent<HTMLDivElement> {
@@ -236,11 +256,49 @@ export class ProfileAddressComponent extends BaseComponent<HTMLDivElement> {
     return button;
   }
 
+  private createCancelButton(): BaseComponent<HTMLButtonElement> {
+    const button = createButton(undefined, 'button');
+    button.setText('Cancel');
+    button.addClass('cancel-button');
+    return button;
+  }
+
   private createDeleteButton(): BaseComponent<HTMLButtonElement> {
     const button = createButton(undefined, 'button');
     button.setText('Delete');
     button.addClass('address-button');
     return button;
+  }
+
+  private onSave(): void {
+    const street = this.streetInput.getInputValue();
+    const city = this.cityInput.getInputValue();
+    const postalCode = this.postalCodeInput.getInputValue();
+    const country = this.countrySelect.getValue();
+    const isDefaultBilling = this.billingRadioButton.isChecked();
+    const isDefaultShipping = this.shippingRadioButton.isChecked();
+
+    this.onSaveCallback({
+      id: this.data?.id,
+      key: this.data?.key,
+      street: street,
+      city: city,
+      country: country,
+      postalCode: postalCode,
+      isDefaultBilling: isDefaultBilling,
+      isDefaultShipping: isDefaultShipping,
+    });
+  }
+
+  private restoreData(): void {
+    if (!this.data) return;
+
+    this.streetInput.setInputValue(this.data.street);
+    this.cityInput.setInputValue(this.data.city);
+    this.postalCodeInput.setInputValue(this.data.postalCode);
+    this.countrySelect.setValue(this.data.country);
+    this.shippingRadioButton.setChecked(this.data.isDefaultShipping);
+    this.billingRadioButton.setChecked(this.data.isDefaultBilling);
   }
 }
 
@@ -249,5 +307,16 @@ export const profileAddressComponent = (
   className: string = 'profile-address-component',
   headerText: string,
   onInputChangedCallback: (() => void) | undefined = undefined,
+  onSaveCallback: (data: AddressData) => void,
+  onCancelCallback: () => void,
+  onDeleteCallback: (addressKey: string) => void,
 ): ProfileAddressComponent =>
-  new ProfileAddressComponent(id, className, headerText, onInputChangedCallback);
+  new ProfileAddressComponent(
+    id,
+    className,
+    headerText,
+    onSaveCallback,
+    onCancelCallback,
+    onDeleteCallback,
+    onInputChangedCallback,
+  );

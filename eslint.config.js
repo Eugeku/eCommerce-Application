@@ -59,6 +59,7 @@ export default tseslintConfig.config([
         'error',
         {
           allowList: {
+            queryArgs: true,
             acc: true,
             env: true,
             i: true,

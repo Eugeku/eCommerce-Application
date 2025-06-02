@@ -41,6 +41,9 @@ export abstract class BaseValidatingInputComponent extends BaseComponent<HTMLDiv
 
   public setActive(state: boolean): void {
     this.input.getElement().readOnly = !state;
+
+    if (state) this.input.addClass('edit');
+    else this.input.removeClass('edit');
   }
 
   public getInputValue(): string {
@@ -49,6 +52,9 @@ export abstract class BaseValidatingInputComponent extends BaseComponent<HTMLDiv
 
   public setInputValue(value: string): void {
     this.input.getElement().value = value;
+
+    this.validate();
+    this.onInputChangedCallback?.();
   }
 
   public isValid(): boolean {

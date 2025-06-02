@@ -1,33 +1,20 @@
 import BaseComponent from '@common-components/base-component';
-import { createButton, createDiv, createP } from '@common-components/base-component-factory';
+import { createButton, createDiv } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
-import './api-popup.scss';
 
-class ApiPopupComponent extends BaseComponent<HTMLDialogElement> {
-  private readonly container: BaseComponent<HTMLDivElement>;
-  private readonly message: BaseComponent<HTMLParagraphElement>;
-  private readonly closeButton: BaseComponent<HTMLButtonElement>;
-  private messageText: string;
+export abstract class BasePopupComponent extends BaseComponent<HTMLDialogElement> {
+  protected readonly container: BaseComponent<HTMLDivElement>;
+  protected readonly closeButton: BaseComponent<HTMLButtonElement>;
   private onCloseCallback?: () => void;
 
   constructor(
     id: string = 'api-error-popup-component',
     className: string = 'api-error-popup-component',
-    messageText: string = 'data not found',
   ) {
     super(Tags.DIALOG, id, className);
 
-    this.messageText = messageText;
     this.container = createDiv('', 'container');
-    this.message = createP(undefined, 'message');
     this.closeButton = createButton(undefined, 'close-button');
-
-    this.init();
-  }
-
-  public setErrorMessage(messageText: string): void {
-    this.messageText = messageText;
-    this.message.setText(this.messageText);
   }
 
   public show(): void {
@@ -40,8 +27,13 @@ class ApiPopupComponent extends BaseComponent<HTMLDialogElement> {
 
   protected renderComponent(): void {
     this.renderContainer();
-    this.renderMessage();
+    this.afterRenderContainer();
     this.renderCloseButton();
+  }
+
+  protected renderCloseButton(): void {
+    this.closeButton.appendTo(this.container.getElement());
+    this.closeButton.setText('Close');
   }
 
   protected addEventListeners(): void {
@@ -50,7 +42,7 @@ class ApiPopupComponent extends BaseComponent<HTMLDialogElement> {
     this.addEventListenerCloseOnEscape();
   }
 
-  private close(): void {
+  protected close(): void {
     this.getElement().close();
     this.remove();
     if (this.onCloseCallback) {
@@ -60,16 +52,6 @@ class ApiPopupComponent extends BaseComponent<HTMLDialogElement> {
 
   private renderContainer(): void {
     this.container.appendTo(this.getElement());
-  }
-
-  private renderMessage(): void {
-    this.message.appendTo(this.container.getElement());
-    this.setErrorMessage(this.messageText);
-  }
-
-  private renderCloseButton(): void {
-    this.closeButton.appendTo(this.container.getElement());
-    this.closeButton.setText('Close');
   }
 
   private addEventListenerCloseButton(): void {
@@ -93,7 +75,6 @@ class ApiPopupComponent extends BaseComponent<HTMLDialogElement> {
       }
     });
   }
-}
 
-export const ApiPopup = (erroMessage: string = 'data not found'): ApiPopupComponent =>
-  new ApiPopupComponent(undefined, undefined, erroMessage);
+  protected abstract afterRenderContainer(): void;
+}
