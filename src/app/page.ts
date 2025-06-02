@@ -6,6 +6,7 @@ import { Login } from './components/login/login';
 import { Main } from './components/main/main';
 import { Profile } from './components/profile/profile';
 import { Registration } from './components/registration/registration';
+import { Store } from './components/store/store';
 import { PlaceholderPage } from './components/under-construction/under-construction';
 import './page.scss';
 
@@ -16,6 +17,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   private readonly login = Login();
   private readonly registration = Registration();
   private readonly placeholder = PlaceholderPage();
+  private readonly store = Store();
   private readonly profile = Profile();
 
   constructor(id: string = 'page-wrapper-component', className: string = 'page-wrapper-component') {
@@ -33,7 +35,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   }
 
   public openStore(): void {
-    this.renderAllComponentsExcept(this.placeholder);
+    this.renderAllComponentsExcept(this.store);
   }
 
   public openAboutUs(): void {
@@ -73,6 +75,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
     this.registration.remove();
     this.placeholder.remove();
     this.profile.remove();
+    this.store.remove();
     component.appendTo(this.getElement());
     // append footer
   }

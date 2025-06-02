@@ -1,14 +1,24 @@
 import {
   type ByProjectKeyRequestBuilder,
+  type CategoryPagedQueryResponse,
   createApiBuilderFromCtpClient,
   type Customer,
   type MyCustomerUpdateAction,
+  type ProductProjectionPagedSearchResponse,
 } from '@commercetools/platform-sdk';
-import { type ClientResponse } from '@commercetools/ts-client';
+import { type QueryParam, type ClientResponse } from '@commercetools/ts-client';
 import { CustomerBuilder } from '@utils/api/bean/customer-builder';
 import { ApiClient } from '@utils/api/build-client';
 import { clearTokens, UserCache } from '@utils/api/token-cache';
 import type { AddressData, PersonalInfoData } from '@/app/components/profile/profile';
+
+export type SearchOptions = {
+  filter?: string[];
+  sort?: string[];
+  limit: number;
+  offset: number;
+  searchText?: string;
+};
 
 class CommerceSdkApi {
   private static instance: CommerceSdkApi;
@@ -30,6 +40,7 @@ class CommerceSdkApi {
     return CommerceSdkApi.instance;
   }
 
+  // Login
   public getProject(): Promise<ClientResponse> {
     return this.apiRoot.get().execute();
   }
@@ -184,6 +195,44 @@ class CommerceSdkApi {
 
   public getMe(): Promise<ClientResponse> {
     return this.apiRoot.me().get().execute();
+  }
+
+  // Store
+  public getProducts(): Promise<ClientResponse<ProductProjectionPagedSearchResponse>> {
+    return this.apiRoot.productProjections().search().get().execute();
+  }
+
+  public getProductsByCategoryId(
+    id: string,
+  ): Promise<ClientResponse<ProductProjectionPagedSearchResponse>> {
+    const body = {
+      queryArgs: {
+        filter: [`categories.id:"${id}"`],
+      },
+    };
+
+    return this.apiRoot.productProjections().search().get(body).execute();
+  }
+
+  public getProductsBySearchOptions(
+    options: SearchOptions,
+  ): Promise<ClientResponse<ProductProjectionPagedSearchResponse>> {
+    const { filter = [], sort = [], limit = 10, offset = 0, searchText = '' } = options;
+
+    const queryArgs: { [key: string]: QueryParam } = {
+      filter,
+      sort,
+      limit,
+      offset,
+    };
+    if (searchText) {
+      queryArgs['text.en-US'] = searchText;
+    }
+    return this.apiRoot.productProjections().search().get({ queryArgs }).execute();
+  }
+
+  public getCategories(): Promise<ClientResponse<CategoryPagedQueryResponse>> {
+    return this.apiRoot.categories().get().execute();
   }
 
   public withAnonymousSessionFlow(): CommerceSdkApi {

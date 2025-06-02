@@ -4,4 +4,8 @@ export type AppEvents = {
   userUpdated: { userId: string };
   toggleBurger: object;
   hideBurger: object;
+  selectCategoryId: { categoryId: string };
+  searchText: { text: string };
+  sort: { text: string };
+  pagination: { page: number };
 };
