@@ -1,4 +1,5 @@
 import { router } from '@app/router';
+import { type ProductProjection } from '@commercetools/platform-sdk';
 import BaseComponent from '@common-components/base-component';
 import {
   createH3,
@@ -8,15 +9,13 @@ import {
   createButton,
 } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
-import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 import './product-page.scss';
 
 class ProductPageComponent extends BaseComponent<HTMLDivElement> {
-  protected arrImages: object[];
-  protected currentImage: number;
-  protected salePriceApi: string;
-
+  private totalImages: number;
+  private currentImage: number;
+  private readonly product: ProductProjection | undefined;
   private readonly wrapper: BaseComponent<HTMLDivElement>;
   private readonly textsContainer: BaseComponent<HTMLDivElement>;
   private readonly h3: BaseComponent<HTMLHeadingElement>;
@@ -30,8 +29,13 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
   private readonly buttonRight: BaseComponent<HTMLButtonElement>;
   private readonly buttonBack: BaseComponent<HTMLButtonElement>;
 
-  constructor(id: string = 'product-page-component', className: string = 'product-page-component') {
+  constructor(
+    id: string = 'product-page-component',
+    className: string = 'product-page-component',
+    product?: ProductProjection,
+  ) {
     super(Tags.DIV, id, className);
+    this.product = product;
 
     this.wrapper = createDiv(undefined, 'wrapper');
     this.textsContainer = createDiv(undefined, 'texts-container');
@@ -46,9 +50,8 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
     this.buttonRight = createButton(undefined, 'button-right');
     this.buttonBack = createButton(undefined, 'button-back');
 
-    this.arrImages = [{ placeholder: 1 }, { placeholder: 2 }, { placeholder: 3 }];
+    this.totalImages = 0;
     this.currentImage = 0;
-    this.salePriceApi = /* TODO: Sdk.salePrice || */ '0';
 
     this.init();
   }
@@ -70,7 +73,9 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
   }
 
   protected openModalSlider(): void {
-    PublishSubscriber().publish('openModalSlider', {});
+    if (this.product) {
+      PublishSubscriber().publish('openModalSlider', { product: this.product });
+    }
   }
 
   protected addEventListeners(): void {
@@ -81,20 +86,38 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
 
   private renderHeading3(): void {
     this.h3.appendTo(this.textsContainer.getElement());
-    this.h3.setText('Product Name');
+    if (this.product && this.product.name['en-US']) {
+      this.h3.setText(this.product.name['en-US']);
+    }
   }
 
   private renderDescription(): void {
     this.description.appendTo(this.textsContainer.getElement());
-    this.description.setText('Description of the Product');
+    if (this.product && this.product.description && this.product.description['en-US']) {
+      this.description.setText(this.product.description['en-US']);
+    }
   }
 
   private renderPrices(): void {
     this.pricesDiv.appendTo(this.textsContainer.getElement());
     this.defaultPrice.appendTo(this.pricesDiv.getElement());
-    this.defaultPrice.setText('$20.00');
+    if (this.product && this.product.masterVariant && this.product.masterVariant.prices) {
+      this.defaultPrice.setText(
+        (this.product.masterVariant.prices[0].value.centAmount / 100 + '$').toString(),
+      );
+    }
     this.salePrice.appendTo(this.pricesDiv.getElement());
-    this.salePrice.setText('$10.00');
+    if (
+      this.product &&
+      this.product.masterVariant &&
+      this.product.masterVariant.prices &&
+      this.product.masterVariant.prices[0].discounted
+    ) {
+      this.salePrice.setText(
+        (this.product.masterVariant.prices[0].discounted.value.centAmount / 100 + '$').toString(),
+      );
+      this.defaultPrice.addClass('discounted');
+    }
   }
 
   private renderTextsContainer(): void {
@@ -105,16 +128,19 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private renderImages(): void {
-    for (const image of this.arrImages) {
-      const picDiv = document.createElement('div');
-      picDiv.classList.add('slider-small-div');
-      picDiv.style.backgroundImage = 'url(https://placecats.com/bella/300/200)';
-      picDiv.addEventListener('click', () => {
-        this.openModalSlider();
-      });
-      this.imagesContainer.getElement().append(picDiv);
+    if (this.product && this.product.masterVariant && this.product.masterVariant.images) {
+      this.totalImages = this.product.masterVariant.images.length;
+      for (const image of this.product.masterVariant.images) {
+        const picDiv = document.createElement('div');
+        picDiv.classList.add('slider-small-div');
+        picDiv.style.backgroundImage = `url(${image.url})`;
+        picDiv.addEventListener('click', () => {
+          this.openModalSlider();
+        });
+        this.imagesContainer.getElement().append(picDiv);
+      }
+      this.imagesContainer.appendTo(this.sliderSmall.getElement());
     }
-    this.imagesContainer.appendTo(this.sliderSmall.getElement());
   }
 
   private renderSliderSmall(): void {
@@ -128,7 +154,7 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
   private addEventListenerLeftButton(): void {
     this.buttonLeft.addEventListener('click', () => {
       if (!this.buttonLeft.getElement().hasAttribute('disabled')) {
-        if (this.currentImage === this.arrImages.length - 1) {
+        if (this.currentImage === this.totalImages - 1) {
           this.buttonRight.getElement().removeAttribute('disabled');
         }
         this.currentImage -= 1;
@@ -152,7 +178,7 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
         const sliderWidth: number = this.imagesContainer.getElement().offsetWidth;
         const offset: number = this.currentImage * sliderWidth;
         this.imagesContainer.getElement().style.transform = `translateX(-${offset}px)`;
-        if (this.currentImage >= this.arrImages.length - 1) {
+        if (this.currentImage >= this.totalImages - 1) {
           this.buttonRight.getElement().setAttribute('disabled', 'true');
         }
       }
@@ -164,24 +190,7 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
       router.navigate('#/store');
     });
   }
-
-  private async onLoad(): Promise<void> {
-    /*
-    await SdkApi()
-      .getProductData(name, description, images, price, salePrice)
-      .then(() => {
-        return SdkApi().withPasswordFlow(email, password).getMe();
-      })
-      .then((response) => {
-        UserCache.set(response.body);
-        PublishSubscriber().publish('userLoggedIn', { userId: email });
-        router.navigate('#/main');
-      })
-      .catch((error) => {
-        console.log(error.body.message);
-      });
-    */
-  }
 }
 
-export const ProductPage = (): ProductPageComponent => new ProductPageComponent();
+export const ProductPage = (product?: ProductProjection): ProductPageComponent =>
+  new ProductPageComponent(undefined, undefined, product);

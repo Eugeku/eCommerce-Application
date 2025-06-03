@@ -10,7 +10,7 @@ import { Tags } from '@common-components/tags';
 import './product-card.scss';
 
 class ProductCardComponent extends BaseComponent<HTMLDivElement> {
-  private readonly product: ProductProjection;
+  public readonly product: ProductProjection;
   private readonly cardWrapper: BaseComponent<HTMLDivElement>;
   private readonly productImage: BaseComponent<HTMLDivElement>;
   private readonly productCardControls: BaseComponent<HTMLDivElement>;

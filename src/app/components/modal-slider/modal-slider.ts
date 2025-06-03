@@ -1,19 +1,14 @@
+import { type ProductProjection } from '@commercetools/platform-sdk';
 import BaseComponent from '@common-components/base-component';
-import {
-  createH3,
-  createP,
-  createDiv,
-  createImg,
-  createButton,
-} from '@common-components/base-component-factory';
+import { createDiv, createButton } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
-import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 import './modal-slider.scss';
 
 class ModalSliderComponent extends BaseComponent<HTMLDivElement> {
-  protected arrImages: object[];
-  private currentImageBig: number;
+  private totalImages: number;
+  private currentImage: number;
+  private readonly product: ProductProjection | undefined;
 
   private readonly wrapperModal: BaseComponent<HTMLDivElement>;
   private readonly sliderBig: BaseComponent<HTMLDivElement>;
@@ -22,9 +17,14 @@ class ModalSliderComponent extends BaseComponent<HTMLDivElement> {
   private readonly buttonRight: BaseComponent<HTMLButtonElement>;
   private readonly buttonClose: BaseComponent<HTMLButtonElement>;
 
-  constructor(id: string = 'modal-slider-component', className: string = 'modal-slider-component') {
+  constructor(
+    id: string = 'modal-slider-component',
+    className: string = 'modal-slider-component',
+    product?: ProductProjection,
+  ) {
     super(Tags.DIV, id, className);
 
+    this.product = product;
     this.wrapperModal = createDiv(undefined, 'modal-wrapper');
     this.sliderBig = createDiv(undefined, 'slider-big');
     this.imagesContainer = createDiv(undefined, 'images-container');
@@ -32,8 +32,8 @@ class ModalSliderComponent extends BaseComponent<HTMLDivElement> {
     this.buttonRight = createButton(undefined, 'button-right');
     this.buttonClose = createButton(undefined, 'button-close');
 
-    this.arrImages = [{ placeholder: 1 }, { placeholder: 2 }, { placeholder: 3 }];
-    this.currentImageBig = 0;
+    this.totalImages = 0;
+    this.currentImage = 0;
 
     this.init();
   }
@@ -59,13 +59,16 @@ class ModalSliderComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private renderImages(): void {
-    for (const image of this.arrImages) {
-      const picDiv = document.createElement('div');
-      picDiv.classList.add('slider-small-div');
-      picDiv.style.backgroundImage = 'url(https://placecats.com/bella/300/200)';
-      this.imagesContainer.getElement().append(picDiv);
+    if (this.product && this.product.masterVariant && this.product.masterVariant.images) {
+      this.totalImages = this.product.masterVariant.images.length;
+      for (const image of this.product.masterVariant.images) {
+        const picDiv = document.createElement('div');
+        picDiv.classList.add('slider-small-div');
+        picDiv.style.backgroundImage = `url(${image.url})`;
+        this.imagesContainer.getElement().append(picDiv);
+      }
+      this.imagesContainer.appendTo(this.sliderBig.getElement());
     }
-    this.imagesContainer.appendTo(this.sliderBig.getElement());
   }
 
   private renderSliderBig(): void {
@@ -79,14 +82,14 @@ class ModalSliderComponent extends BaseComponent<HTMLDivElement> {
   private addEventListenerLeftButton(): void {
     this.buttonLeft.addEventListener('click', () => {
       if (!this.buttonLeft.getElement().hasAttribute('disabled')) {
-        if (this.currentImageBig === this.arrImages.length - 1) {
+        if (this.currentImage === this.totalImages - 1) {
           this.buttonRight.getElement().removeAttribute('disabled');
         }
-        this.currentImageBig -= 1;
+        this.currentImage -= 1;
         const sliderWidth: number = this.imagesContainer.getElement().offsetWidth;
-        const offset: number = this.currentImageBig * sliderWidth;
+        const offset: number = this.currentImage * sliderWidth;
         this.imagesContainer.getElement().style.transform = `translateX(-${offset}px)`;
-        if (this.currentImageBig <= 0) {
+        if (this.currentImage <= 0) {
           this.buttonLeft.getElement().setAttribute('disabled', 'true');
         }
       }
@@ -96,14 +99,14 @@ class ModalSliderComponent extends BaseComponent<HTMLDivElement> {
   private addEventListenerRightButton(): void {
     this.buttonRight.addEventListener('click', () => {
       if (!this.buttonRight.getElement().hasAttribute('disabled')) {
-        if (this.currentImageBig === 0) {
+        if (this.currentImage === 0) {
           this.buttonLeft.getElement().removeAttribute('disabled');
         }
-        this.currentImageBig += 1;
+        this.currentImage += 1;
         const sliderWidth: number = this.imagesContainer.getElement().offsetWidth;
-        const offset: number = this.currentImageBig * sliderWidth;
+        const offset: number = this.currentImage * sliderWidth;
         this.imagesContainer.getElement().style.transform = `translateX(-${offset}px)`;
-        if (this.currentImageBig >= this.arrImages.length - 1) {
+        if (this.currentImage >= this.totalImages - 1) {
           this.buttonRight.getElement().setAttribute('disabled', 'true');
         }
       }
@@ -115,24 +118,7 @@ class ModalSliderComponent extends BaseComponent<HTMLDivElement> {
       PublishSubscriber().publish('closeModalSlider', {});
     });
   }
-
-  private async onLoad(): Promise<void> {
-    /*
-    await SdkApi()
-      .getProductData(name, description, images, price, salePrice)
-      .then(() => {
-        return SdkApi().withPasswordFlow(email, password).getMe();
-      })
-      .then((response) => {
-        UserCache.set(response.body);
-        PublishSubscriber().publish('userLoggedIn', { userId: email });
-        router.navigate('#/main');
-      })
-      .catch((error) => {
-        console.log(error.body.message);
-      });
-    */
-  }
 }
 
-export const ModalSlider = (): ModalSliderComponent => new ModalSliderComponent();
+export const ModalSlider = (product?: ProductProjection): ModalSliderComponent =>
+  new ModalSliderComponent(undefined, undefined, product);

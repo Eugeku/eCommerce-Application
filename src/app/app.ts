@@ -3,6 +3,7 @@ import { router } from '@app/router';
 import type BaseComponent from '@common-components/base-component';
 import { createDiv } from '@common-components/base-component-factory';
 import { SdkApi } from './utils/api/commerce-sdk-api';
+import { PublishSubscriber } from './utils/event-bus/event-bus';
 import './app.scss';
 
 class App {
@@ -72,9 +73,8 @@ class App {
   }
 
   public setAdditionalRoutes(): void {
-    const productName = 'product-name';
-    router.addRoute(`#/product/${productName}`, () => {
-      this.pageWrapper.openProduct();
+    PublishSubscriber().subscribe('selectProduct', (payload) => {
+      this.pageWrapper.openProduct(payload.product);
     });
   }
 }
