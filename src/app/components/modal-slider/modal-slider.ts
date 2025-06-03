@@ -50,6 +50,7 @@ class ModalSliderComponent extends BaseComponent<HTMLDivElement> {
 
   protected renderCloseButton(): void {
     this.buttonClose.appendTo(this.getElement());
+    this.buttonClose.getElement().style.backgroundImage = 'url(./assets/icons/cross.png)';
   }
 
   protected addEventListeners(): void {
@@ -75,7 +76,9 @@ class ModalSliderComponent extends BaseComponent<HTMLDivElement> {
     this.renderImages();
     this.buttonLeft.setAttribute('disabled', 'true');
     this.buttonLeft.appendTo(this.sliderBig.getElement());
+    this.buttonLeft.getElement().style.backgroundImage = 'url(./assets/icons/arrow-left.png)';
     this.buttonRight.appendTo(this.sliderBig.getElement());
+    this.buttonRight.getElement().style.backgroundImage = 'url(./assets/icons/arrow-left.png)';
     this.sliderBig.appendTo(this.wrapperModal.getElement());
   }
 
