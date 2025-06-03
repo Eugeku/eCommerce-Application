@@ -36,6 +36,7 @@ class CategoryNavComponent extends BaseComponent<HTMLUListElement> {
   private async renderCategoryNav(): Promise<void> {
     const categoryElement = CategoryElement();
     this.items.push(categoryElement);
+    categoryElement.setActive(true);
     categoryElement.appendTo(this.getElement());
 
     await this.loadCategories();

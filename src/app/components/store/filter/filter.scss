@@ -6,4 +6,28 @@
   justify-content: center;
 
   list-style: none;
+
+  .filter-input,
+  .filter-select {
+    width: 100%;
+    height: 2rem;
+    margin-top: 0.3rem;
+    padding: 0;
+    border: none;
+    border-radius: 1rem;
+
+    font-family: Genshin, serif;
+    font-size: 1rem;
+    line-height: 2.5rem;
+    color: var(--cosmos);
+    text-indent: 0.7rem;
+
+    background: var(--beige);
+    box-shadow: 0 0 0.7rem 0 var(--white);
+  }
+
+  .filter-select {
+    cursor: pointer;
+    text-shadow: none;
+  }
 }

@@ -44,6 +44,7 @@ class ProductListComponent extends BaseComponent<HTMLDivElement> {
   private addEventListenerSelectByCategory(): void {
     PublishSubscriber().subscribe('selectCategoryId', (payload) => {
       this.searchOptions.offset = 0;
+      this.pagination.setCurrentPage(0);
       if (payload.categoryId.toLowerCase() === 'all') {
         this.renderProductListBySearchOptions([]);
       } else {
@@ -122,6 +123,9 @@ class ProductListComponent extends BaseComponent<HTMLDivElement> {
           const productCard = ProductCard(product);
           this.items.push(productCard);
         });
+        if (response.body?.total) {
+          this.pagination.setTotalPages(Math.ceil(response.body.total / this.searchOptions.limit));
+        }
       });
   }
 
@@ -137,7 +141,9 @@ class ProductListComponent extends BaseComponent<HTMLDivElement> {
     text?: string,
   ): Promise<void> {
     await this.loadProductsBySearchOptions(filter, sort, limit, offset, text);
-    this.items.map((item) => item.appendTo(this.productCardWrapper.getElement()));
+    this.items.map((item) => {
+      item.appendTo(this.productCardWrapper.getElement());
+    });
   }
 }
 
