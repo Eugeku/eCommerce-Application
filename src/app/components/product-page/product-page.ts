@@ -147,7 +147,9 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
     this.renderImages();
     this.buttonLeft.setAttribute('disabled', 'true');
     this.buttonLeft.appendTo(this.sliderSmall.getElement());
+    this.buttonLeft.getElement().style.backgroundImage = 'url(./assets/icons/arrow-left.png)';
     this.buttonRight.appendTo(this.sliderSmall.getElement());
+    this.buttonRight.getElement().style.backgroundImage = 'url(./assets/icons/arrow-left.png)';
     this.sliderSmall.appendTo(this.wrapper.getElement());
   }
 
