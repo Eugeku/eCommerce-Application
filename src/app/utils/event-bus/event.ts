@@ -1,3 +1,5 @@
+import { type ProductProjection } from '@commercetools/platform-sdk';
+
 export type AppEvents = {
   userLoggedIn: { userId: string };
   userLoggedOut: { userId: string };
@@ -8,6 +10,7 @@ export type AppEvents = {
   searchText: { text: string };
   sort: { text: string };
   pagination: { page: number };
-  openModalSlider: object;
+  openModalSlider: { product: ProductProjection };
   closeModalSlider: object;
+  selectProduct: { product: ProductProjection };
 };

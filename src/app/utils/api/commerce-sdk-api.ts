@@ -202,18 +202,6 @@ class CommerceSdkApi {
     return this.apiRoot.productProjections().search().get().execute();
   }
 
-  public getProductsByCategoryId(
-    id: string,
-  ): Promise<ClientResponse<ProductProjectionPagedSearchResponse>> {
-    const body = {
-      queryArgs: {
-        filter: [`categories.id:"${id}"`],
-      },
-    };
-
-    return this.apiRoot.productProjections().search().get(body).execute();
-  }
-
   public getProductsBySearchOptions(
     options: SearchOptions,
   ): Promise<ClientResponse<ProductProjectionPagedSearchResponse>> {

@@ -3,6 +3,7 @@ import { Tags } from '@common-components/tags';
 import { Pagination } from './pagination/pagination';
 import { ProductCard } from './product-card/product-card';
 import { createDiv } from '../../common/base-component-factory';
+import { router } from '@/app/router';
 import { SdkApi, type SearchOptions } from '@/app/utils/api/commerce-sdk-api';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 import './product-list.scss';
@@ -143,6 +144,12 @@ class ProductListComponent extends BaseComponent<HTMLDivElement> {
     await this.loadProductsBySearchOptions(filter, sort, limit, offset, text);
     this.items.map((item) => {
       item.appendTo(this.productCardWrapper.getElement());
+      item.addEventListener('click', () => {
+        router.addRoute(`#/store/${item.product.key}`, () => {
+          PublishSubscriber().publish('selectProduct', { product: item.product });
+        });
+        router.navigate(`#/store/${item.product.key}`);
+      });
     });
   }
 }
