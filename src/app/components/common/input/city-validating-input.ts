@@ -8,7 +8,7 @@ export class CityValidatingInput extends BaseValidatingInputComponent {
   constructor(
     id: string = 'city-input',
     className: string = 'city-input',
-    onInputChangedCallback: (() => void) | null,
+    onInputChangedCallback: (() => void) | undefined,
     labelParameters: LabelParameters | undefined,
   ) {
     super(id, className, onInputChangedCallback, labelParameters);
@@ -26,7 +26,7 @@ export class CityValidatingInput extends BaseValidatingInputComponent {
 }
 
 export const cityValidatingInput = (
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
   labelParameters: LabelParameters | undefined = undefined,
 ): CityValidatingInput =>
   new CityValidatingInput('city-input', 'city-input', onInputChangedCallback, labelParameters);

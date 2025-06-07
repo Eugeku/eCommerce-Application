@@ -3,6 +3,7 @@ import { router } from '@app/router';
 import type BaseComponent from '@common-components/base-component';
 import { createDiv } from '@common-components/base-component-factory';
 import { SdkApi } from './utils/api/commerce-sdk-api';
+import { PublishSubscriber } from './utils/event-bus/event-bus';
 import './app.scss';
 
 class App {
@@ -17,6 +18,7 @@ class App {
   public start(): void {
     this.pageWrapper.appendTo(this.root.getElement());
     this.setupRoutes();
+    this.setAdditionalRoutes();
     router.handleInitialRoute();
   }
 
@@ -67,6 +69,12 @@ class App {
 
     router.addRoute('*', () => {
       this.pageWrapper.openNotFound();
+    });
+  }
+
+  public setAdditionalRoutes(): void {
+    PublishSubscriber().subscribe('selectProduct', (payload) => {
+      this.pageWrapper.openProduct(payload.product);
     });
   }
 }

@@ -1,0 +1,138 @@
+.modal-slider-component {
+  position: fixed;
+  z-index: 40;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+  padding: 3rem 1.5rem;
+
+  background-color: var(--blue-70);
+  backdrop-filter: blur(0.7rem);
+
+  transition-duration: var(--medium-speed);
+  transition-property: backdrop-filter;
+
+  .modal-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+
+    .slider-big {
+      scrollbar-gutter: unset;
+
+      position: relative;
+
+      overflow: hidden;
+      display: flex;
+
+      width: 100%;
+      height: 100%;
+
+      .images-container {
+        scrollbar-gutter: stable;
+        display: flex;
+        width: 100%;
+        transition: transform 0.4s ease-in-out;
+
+        .slider-small-div {
+          scrollbar-gutter: unset;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          width: 100%;
+          min-width: 100%;
+          height: 100%;
+
+          background-image: url('https://placecats.com/bella/500/1000');
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: contain;
+        }
+      }
+
+      .button-left,
+      .button-right {
+        cursor: pointer;
+
+        position: absolute;
+        z-index: 45;
+        top: calc(50% - 1.5rem);
+        left: 0.5rem;
+
+        width: 3rem;
+        height: 3rem;
+        border: none;
+        border-radius: 50%;
+
+        appearance: none;
+        opacity: 0.3;
+        background-color: transparent;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 65%;
+
+        transition:
+          background 0.4s ease-in-out,
+          opacity 0.4s ease-in-out;
+
+        &:disabled {
+          cursor: default;
+        }
+
+        &:hover {
+          &:not(:disabled) {
+            opacity: 1;
+            background-color: var(--transparent-white-50);
+          }
+        }
+
+        &.button-right {
+          right: 0.5rem;
+          left: unset;
+          transform: scaleX(-1);
+        }
+      }
+    }
+  }
+
+  .button-close {
+    cursor: pointer;
+
+    position: absolute;
+    z-index: 45;
+    top: 1rem;
+    right: 1rem;
+
+    width: 3rem;
+    height: 3rem;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 1rem;
+    border-radius: 50%;
+
+    appearance: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 65%;
+
+    transition:
+      background 0.4s ease-in-out,
+      opacity 0.4s ease-in-out;
+
+    &:hover {
+      background-color: var(--transparent-white-50);
+    }
+  }
+}

@@ -13,13 +13,19 @@ export class PasswordValidatingInput extends BaseValidatingInputComponent {
   constructor(
     id: string = 'password-input',
     className: string = 'password-input',
-    onInputChangedCallback: (() => void) | null,
+    onInputChangedCallback: (() => void) | undefined,
     labelParameters: LabelParameters | undefined,
   ) {
     super(id, className, onInputChangedCallback, labelParameters);
 
     this.passwordControl = this.createPasswordControl();
     this.init();
+  }
+
+  public setPasswordVisible(state: boolean): void {
+    this.input.getElement().type = state ? InputType.TEXT : InputType.PASSWORD;
+    this.passwordControl.removeChildren();
+    this.passwordControl?.getElement().insertAdjacentHTML('afterbegin', state ? eyeOpen : eyeClose);
   }
 
   protected addEventListeners(): void {
@@ -52,11 +58,7 @@ export class PasswordValidatingInput extends BaseValidatingInputComponent {
   private addEventListenerPasswordControl(): void {
     this.passwordControl.addEventListener('click', () => {
       this.isPasswordVisible = !this.isPasswordVisible;
-      this.input.getElement().type = this.isPasswordVisible ? InputType.TEXT : InputType.PASSWORD;
-      this.passwordControl.removeChildren();
-      this.passwordControl
-        ?.getElement()
-        .insertAdjacentHTML('afterbegin', this.isPasswordVisible ? eyeOpen : eyeClose);
+      this.setPasswordVisible(this.isPasswordVisible);
     });
   }
 
@@ -68,7 +70,7 @@ export class PasswordValidatingInput extends BaseValidatingInputComponent {
 }
 
 export const passwordValidatingInput = (
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
   labelParameters: LabelParameters | undefined = undefined,
 ): PasswordValidatingInput =>
   new PasswordValidatingInput(

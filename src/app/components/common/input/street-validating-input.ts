@@ -8,7 +8,7 @@ export class StreetValidatingInput extends BaseValidatingInputComponent {
   constructor(
     id: string = 'street-input',
     className: string = 'street-input',
-    onInputChangedCallback: (() => void) | null,
+    onInputChangedCallback: (() => void) | undefined,
     labelParameters: LabelParameters | undefined,
   ) {
     super(id, className, onInputChangedCallback, labelParameters);
@@ -27,7 +27,7 @@ export class StreetValidatingInput extends BaseValidatingInputComponent {
 }
 
 export const streetValidatingInput = (
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
   labelParameters: LabelParameters | undefined = undefined,
 ): StreetValidatingInput =>
   new StreetValidatingInput(

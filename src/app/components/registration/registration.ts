@@ -1,5 +1,4 @@
 import type { Customer } from '@commercetools/platform-sdk';
-import { ApiPopup } from '@components/api-popup/api-popup';
 import type { AddressComponent } from '../common/address-component/address-component';
 import { addressComponent } from '../common/address-component/address-component';
 import BaseComponent from '../common/base-component';
@@ -17,6 +16,7 @@ import { lastNameValidatingInput } from '../common/input/last-name-validating-in
 import type { PasswordValidatingInput } from '../common/input/password-validating-input';
 import { passwordValidatingInput } from '../common/input/password-validating-input';
 import { Tags } from '../common/tags';
+import { ApiPopup } from '../popups/api-popup/api-popup';
 import { router } from '@/app/router';
 import { CustomerBuilder } from '@/app/utils/api/bean/customer-builder';
 import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
@@ -274,7 +274,7 @@ class RegistrationComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private createUseAsBillingCheckbox(): Checkbox {
-    return checkbox(undefined, 'address-checkbox', null, 'Use the same address for billing');
+    return checkbox(undefined, 'address-checkbox', undefined, 'Use the same address for billing');
   }
 
   private createSignUpButton(): BaseComponent<HTMLButtonElement> {

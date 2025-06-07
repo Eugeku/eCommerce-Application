@@ -1,12 +1,24 @@
 import {
   type ByProjectKeyRequestBuilder,
+  type CategoryPagedQueryResponse,
   createApiBuilderFromCtpClient,
   type Customer,
+  type MyCustomerUpdateAction,
+  type ProductProjectionPagedSearchResponse,
 } from '@commercetools/platform-sdk';
-import { type ClientResponse } from '@commercetools/ts-client';
+import { type QueryParam, type ClientResponse } from '@commercetools/ts-client';
 import { CustomerBuilder } from '@utils/api/bean/customer-builder';
 import { ApiClient } from '@utils/api/build-client';
 import { clearTokens, UserCache } from '@utils/api/token-cache';
+import type { AddressData, PersonalInfoData } from '@/app/components/profile/profile';
+
+export type SearchOptions = {
+  filter?: string[];
+  sort?: string[];
+  limit: number;
+  offset: number;
+  searchText?: string;
+};
 
 class CommerceSdkApi {
   private static instance: CommerceSdkApi;
@@ -28,6 +40,7 @@ class CommerceSdkApi {
     return CommerceSdkApi.instance;
   }
 
+  // Login
   public getProject(): Promise<ClientResponse> {
     return this.apiRoot.get().execute();
   }
@@ -54,6 +67,117 @@ class CommerceSdkApi {
       .execute();
   }
 
+  public async updateCustomer(data: PersonalInfoData): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+
+    return this.apiRoot
+      .me()
+      .post({
+        body: {
+          version: me.body.version,
+          actions: [
+            {
+              action: 'changeEmail',
+              email: data.email,
+            },
+            {
+              action: 'setFirstName',
+              firstName: data.firstName,
+            },
+            {
+              action: 'setLastName',
+              lastName: data.lastName,
+            },
+            {
+              action: 'setDateOfBirth',
+              dateOfBirth: data.dateOfBirth,
+            },
+          ],
+        },
+      })
+      .execute();
+  }
+
+  public async addAddress(data: AddressData): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+
+    const actions: MyCustomerUpdateAction[] = [
+      {
+        action: 'addAddress',
+        address: {
+          key: data.key,
+          streetName: data.street,
+          city: data.city,
+          country: data.country,
+          postalCode: data.postalCode,
+        },
+      },
+    ];
+
+    if (data.isDefaultShipping) {
+      actions.push({
+        action: 'setDefaultShippingAddress',
+        addressKey: data.key,
+      });
+    }
+
+    if (data.isDefaultBilling) {
+      actions.push({
+        action: 'setDefaultBillingAddress',
+        addressKey: data.key,
+      });
+    }
+
+    return this.apiRoot
+      .me()
+      .post({
+        body: {
+          version: me.body.version,
+          actions: actions,
+        },
+      })
+      .execute();
+  }
+
+  public async deleteAddress(id: string): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+
+    return this.apiRoot
+      .me()
+      .post({
+        body: {
+          version: me.body.version,
+          actions: [
+            {
+              action: 'removeAddress',
+              addressId: id,
+            },
+          ],
+        },
+      })
+      .execute();
+  }
+
+  public async updatePassword(
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+
+    return this.apiRoot
+      .customers()
+      .password()
+      .post({
+        body: {
+          id: me.body.id,
+          version: me.body.version,
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        },
+      })
+      .execute();
+  }
+
   public async loginUser(email: string, password: string): Promise<ClientResponse> {
     return this.apiRoot
       .login()
@@ -71,6 +195,32 @@ class CommerceSdkApi {
 
   public getMe(): Promise<ClientResponse> {
     return this.apiRoot.me().get().execute();
+  }
+
+  // Store
+  public getProducts(): Promise<ClientResponse<ProductProjectionPagedSearchResponse>> {
+    return this.apiRoot.productProjections().search().get().execute();
+  }
+
+  public getProductsBySearchOptions(
+    options: SearchOptions,
+  ): Promise<ClientResponse<ProductProjectionPagedSearchResponse>> {
+    const { filter = [], sort = [], limit = 10, offset = 0, searchText = '' } = options;
+
+    const queryArgs: { [key: string]: QueryParam } = {
+      filter,
+      sort,
+      limit,
+      offset,
+    };
+    if (searchText) {
+      queryArgs['text.en-US'] = searchText;
+    }
+    return this.apiRoot.productProjections().search().get({ queryArgs }).execute();
+  }
+
+  public getCategories(): Promise<ClientResponse<CategoryPagedQueryResponse>> {
+    return this.apiRoot.categories().get().execute();
   }
 
   public withAnonymousSessionFlow(): CommerceSdkApi {
@@ -102,6 +252,88 @@ class CommerceSdkApi {
     const user = UserCache.get();
 
     return token && token.expirationTime > now && user !== undefined;
+  }
+
+  public async changeAddress(data: AddressData): Promise<ClientResponse> {
+    const me = await this.apiRoot.me().get().execute();
+    const defaultShippingId = me.body.defaultShippingAddressId;
+    const defualtBillingId = me.body.defaultBillingAddressId;
+
+    const actions: MyCustomerUpdateAction[] = this.getChangeAddressActions(
+      data,
+      defaultShippingId,
+      defualtBillingId,
+    );
+
+    return this.apiRoot
+      .me()
+      .post({
+        body: {
+          version: me.body.version,
+          actions: actions,
+        },
+      })
+      .execute();
+  }
+
+  private getChangeAddressActions(
+    data: AddressData,
+    defaultShippingId: string | undefined,
+    defualtBillingId: string | undefined,
+  ): MyCustomerUpdateAction[] {
+    const actions: MyCustomerUpdateAction[] = [
+      {
+        action: 'changeAddress',
+        addressId: data.id,
+        address: {
+          streetName: data.street,
+          city: data.city,
+          country: data.country,
+          postalCode: data.postalCode,
+        },
+      },
+    ];
+
+    this.pushSetDefaultShippingActionForChangeAddress(actions, defaultShippingId, data);
+    this.pushSetDefaultBillingActionForChangeAddress(actions, defualtBillingId, data);
+
+    return actions;
+  }
+
+  private pushSetDefaultShippingActionForChangeAddress(
+    actions: MyCustomerUpdateAction[],
+    defaultShippingId: string | undefined,
+    data: AddressData,
+  ): void {
+    if (data.isDefaultShipping && defaultShippingId !== data.id) {
+      actions.push({
+        action: 'setDefaultShippingAddress',
+        addressId: data.id,
+      });
+    } else if (!data.isDefaultShipping && defaultShippingId === data.id) {
+      actions.push({
+        action: 'setDefaultShippingAddress',
+        addressId: undefined,
+      });
+    }
+  }
+
+  private pushSetDefaultBillingActionForChangeAddress(
+    actions: MyCustomerUpdateAction[],
+    defualtBillingId: string | undefined,
+    data: AddressData,
+  ): void {
+    if (data.isDefaultBilling && defualtBillingId !== data.id) {
+      actions.push({
+        action: 'setDefaultBillingAddress',
+        addressId: data.id,
+      });
+    } else if (!data.isDefaultBilling && defualtBillingId === data.id) {
+      actions.push({
+        action: 'setDefaultBillingAddress',
+        addressId: undefined,
+      });
+    }
   }
 
   private initializeSession(): void {

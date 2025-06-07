@@ -8,4 +8,5 @@ export enum InputType {
   EMAIL = 'email',
   DATE = 'date',
   CHECKBOX = 'checkbox',
+  RADIO = 'radio',
 }

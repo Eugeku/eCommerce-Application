@@ -1,0 +1,42 @@
+.pagination-component {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  max-width: 340px;
+  height: 52px;
+
+  .button-pagination {
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 52px;
+    height: 52px;
+    border-radius: 100px;
+
+    background: var(--beige);
+
+    transition: 0.4s ease-in-out;
+
+    &.active {
+      border: 2px solid var(--beige);
+    }
+
+    &:hover {
+      background-color: var(--transparent-white-30);
+    }
+
+    span {
+      font-size: 20px;
+      font-weight: 400;
+      line-height: 115%;
+      text-align: center;
+      letter-spacing: 0.06em;
+    }
+  }
+}

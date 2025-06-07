@@ -1,23 +1,20 @@
+import { CountrySelect } from '@app/components/common/address-component/country-select-component';
+import BaseComponent from '@app/components/common/base-component';
+import { createDiv, createH3, createLabel } from '@app/components/common/base-component-factory';
+import { checkbox, type Checkbox } from '@app/components/common/checkbox-component';
+import { cityValidatingInput } from '@app/components/common/input/city-validating-input';
+import type { CityValidatingInput } from '@app/components/common/input/city-validating-input';
+import { postalCodeValidatingInput } from '@app/components/common/input/postal-code-validating-input';
+import type { PostalCodeValidatingInput } from '@app/components/common/input/postal-code-validating-input';
+import { streetValidatingInput } from '@app/components/common/input/street-validating-input';
+import type { StreetValidatingInput } from '@app/components/common/input/street-validating-input';
+import { Tags } from '@app/components/common/tags';
 import type { BaseAddress } from '@commercetools/platform-sdk';
-import BaseComponent from '../base-component';
-import { createDiv, createH3, createLabel } from '../base-component-factory';
-import { checkbox, type Checkbox } from '../checkbox-component';
-import type { CityValidatingInput } from '../input/city-validating-input';
-import { cityValidatingInput } from '../input/city-validating-input';
-import type { PostalCodeValidatingInput } from '../input/postal-code-validating-input';
-import { postalCodeValidatingInput } from '../input/postal-code-validating-input';
-import type { StreetValidatingInput } from '../input/street-validating-input';
-import { streetValidatingInput } from '../input/street-validating-input';
-import { Tags } from '../tags';
-import type { CountrySelectOptionPair } from './country-select-component';
-import { CountrySelect } from './country-select-component';
 import { AddressBuilder } from '@/app/utils/api/bean/address-builder';
+import { coutriesPairs } from '@/app/utils/countries-pairs';
 
 export class AddressComponent extends BaseComponent<HTMLDivElement> {
   private enabled: boolean = true;
-  private readonly coutriesPairs: Array<CountrySelectOptionPair> = [
-    { value: 'US', text: 'United States' },
-  ];
 
   private readonly header: BaseComponent<HTMLHeadingElement>;
   private readonly streetInput: StreetValidatingInput;
@@ -28,14 +25,14 @@ export class AddressComponent extends BaseComponent<HTMLDivElement> {
   private readonly countrySelect: CountrySelect;
   private readonly checkBox: Checkbox;
 
-  private readonly onInputChangedCallback: (() => void) | null;
+  private readonly onInputChangedCallback: (() => void) | undefined;
 
   constructor(
     id: string = 'address-component',
     className: string = 'address-component',
     headerText: string,
     checkboxText: string,
-    onInputChangedCallback: (() => void) | null = null,
+    onInputChangedCallback: (() => void) | undefined,
   ) {
     super(Tags.DIV, id, className);
     this.onInputChangedCallback = onInputChangedCallback;
@@ -50,6 +47,14 @@ export class AddressComponent extends BaseComponent<HTMLDivElement> {
     this.checkBox = this.createCheckBox(checkboxText);
 
     this.init();
+  }
+
+  public reset(): void {
+    this.streetInput.setInputValue('');
+    this.cityInput.setInputValue('');
+    this.postalCodeInput.setInputValue('');
+    this.countrySelect.reset();
+    this.checkBox.setChecked(false);
   }
 
   public setEnabled(flag: boolean): void {
@@ -144,11 +149,11 @@ export class AddressComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private createCountrySelect(): CountrySelect {
-    return new CountrySelect(this.coutriesPairs, this.onInputChangedCallback);
+    return new CountrySelect(coutriesPairs, this.onInputChangedCallback);
   }
 
   private createCheckBox(checkboxText: string): Checkbox {
-    return checkbox(undefined, 'address-checkbox', null, checkboxText);
+    return checkbox(undefined, 'address-checkbox', undefined, checkboxText);
   }
 }
 
@@ -157,6 +162,6 @@ export const addressComponent = (
   className: string = 'address-component',
   headerText: string,
   checkboxText: string,
-  onInputChangedCallback: (() => void) | null = null,
+  onInputChangedCallback: (() => void) | undefined,
 ): AddressComponent =>
   new AddressComponent(id, className, headerText, checkboxText, onInputChangedCallback);
