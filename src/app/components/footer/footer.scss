@@ -1,0 +1,39 @@
+.footer-component {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+
+  height: 100%;
+  padding: 3rem 3rem 2rem;
+
+  .link {
+    cursor: pointer;
+
+    color: var(--beige);
+    text-align: center;
+    text-decoration: none;
+
+    transition: color var(--medium-speed) ease-in-out;
+
+    &:hover {
+      color: var(--white);
+    }
+  }
+
+  .paragraph {
+    font-size: 0.7rem;
+    text-align: center;
+    opacity: 0.4;
+    transition: opacity var(--medium-speed) ease-in-out;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  @media screen and (width <= 620px) {
+    padding: 2rem 1rem 1rem;
+  }
+}
