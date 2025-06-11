@@ -6,6 +6,7 @@ export enum Tags {
 
   // Non-semantic tags
   DIV = 'div',
+  SECTION = 'section',
   BUTTON = 'button',
   INPUT = 'input',
   SPAN = 'span',
