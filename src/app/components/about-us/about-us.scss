@@ -42,10 +42,11 @@
     .team-member-component {
       display: flex;
 
-      padding-right: 1.5rem;
+      padding-right: 1.6rem;
       border-radius: 1rem;
 
       line-height: 1.5;
+      letter-spacing: 0.02em;
 
       background: linear-gradient(transparent, transparent 50%, var(--blue-40) 80%);
       box-shadow: 0 0 1rem 0 var(--white);
@@ -73,6 +74,7 @@
       }
 
       .member-description {
+        max-width: 41rem;
         font-size: 0.8rem;
       }
 
@@ -110,6 +112,28 @@
         flex-direction: column;
         padding: 1.5rem;
       }
+    }
+  }
+
+  .collaboration {
+    margin: 3rem 0;
+    padding: 2rem;
+    border-radius: 1rem;
+
+    font-size: 0.8rem;
+    line-height: 1.5;
+
+    background-color: rgb(255 255 255 / 30%);
+    box-shadow: 0 0 1rem 0 var(--white);
+
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.03);
+    }
+
+    .collaboration-description {
+      max-width: 50rem;
     }
   }
 }
