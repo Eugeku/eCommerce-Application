@@ -2,6 +2,7 @@ import { type ProductProjection } from '@commercetools/platform-sdk';
 import BaseComponent from '@common-components/base-component';
 import { Tags } from '@common-components/tags';
 import { NotFound } from '@components/404/404';
+import { AboutUs } from './components/about-us/about-us';
 import { Header } from './components/header/header';
 import { Login } from './components/login/login';
 import { Main } from './components/main/main';
@@ -25,6 +26,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   private readonly profile = Profile();
   private modalSlider = ModalSlider();
   private product = ProductPage();
+  private readonly aboutUs = AboutUs();
 
   constructor(id: string = 'page-wrapper-component', className: string = 'page-wrapper-component') {
     super(Tags.DIV, id, className);
@@ -45,7 +47,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   }
 
   public openAboutUs(): void {
-    this.renderAllComponentsExcept(this.placeholder);
+    this.renderAllComponentsExcept(this.aboutUs);
   }
 
   public openCart(): void {
@@ -106,6 +108,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
     this.profile.remove();
     this.product.remove();
     this.store.remove();
+    this.aboutUs.remove();
     this.modalSlider.remove();
     component.appendTo(this.getElement());
     // append footer

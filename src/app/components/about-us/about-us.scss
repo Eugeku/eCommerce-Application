@@ -1,0 +1,115 @@
+.about-us-component {
+  display: flex;
+  flex-direction: column;
+
+  max-width: 960px;
+  margin: auto;
+  padding: 2rem;
+
+  .school-logo {
+    cursor: pointer;
+
+    display: block;
+
+    width: 8rem;
+    height: 6rem;
+    margin: 0 auto 1rem;
+
+    opacity: 0.8;
+    background-image: url('/assets/backgrounds/rss_logo.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.02);
+      opacity: 1;
+      filter: brightness(1.1) saturate(1.2);
+    }
+  }
+
+  .heading-2 {
+    margin: 0 0 2rem;
+  }
+
+  .team-members {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    .team-member-component {
+      display: flex;
+
+      padding-right: 1.5rem;
+      border-radius: 1rem;
+
+      line-height: 1.5;
+
+      background: linear-gradient(transparent, transparent 50%, var(--blue-40) 80%);
+      box-shadow: 0 0 1rem 0 var(--white);
+
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.03);
+      }
+
+      .avatar-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .avatar {
+          width: 200px;
+          height: 200px;
+        }
+      }
+
+      .member-name,
+      .member-role {
+        margin: 1.5rem 0;
+      }
+
+      .member-description {
+        font-size: 0.8rem;
+      }
+
+      .contributions-list {
+        margin: 1rem 2rem;
+        font-size: 0.8rem;
+      }
+
+      .github-link {
+        cursor: pointer;
+
+        display: block;
+
+        width: 3.5rem;
+        height: 2rem;
+        margin: 2rem 0 1.5rem;
+        margin-top: 0.5rem;
+
+        opacity: 0.8;
+        background-image: url('/assets/icons/github-icon.svg');
+        background-repeat: no-repeat;
+        background-position: left;
+        background-size: contain;
+
+        transition: transform 0.3s ease;
+
+        &:hover {
+          transform: scale(1.03);
+          opacity: 1;
+          filter: brightness(1.1) saturate(1.2);
+        }
+      }
+
+      @media (width <=600px) {
+        flex-direction: column;
+        padding: 1.5rem;
+      }
+    }
+  }
+}
