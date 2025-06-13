@@ -32,6 +32,7 @@
 
   .heading-2 {
     margin: 0 0 2rem;
+    font-size: 1.2rem;
   }
 
   .team-members {
@@ -71,6 +72,10 @@
       .member-name,
       .member-role {
         margin: 1.5rem 0;
+      }
+
+      .member-name {
+        font-size: 1.2rem;
       }
 
       .member-description {
