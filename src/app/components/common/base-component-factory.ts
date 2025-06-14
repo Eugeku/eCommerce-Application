@@ -21,6 +21,10 @@ function createElement<T extends HTMLElement>(
 
 export const createDiv = (id = '', className: string = Tags.DIV): BaseComponent<HTMLDivElement> =>
   createElement<HTMLDivElement>(Tags.DIV, id, className);
+export const createSection = (
+  id = '',
+  className: string = Tags.SECTION,
+): BaseComponent<HTMLDivElement> => createElement<HTMLDivElement>(Tags.SECTION, id, className);
 export const createButton = (
   id = '',
   className: string = Tags.BUTTON,
