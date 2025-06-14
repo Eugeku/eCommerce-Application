@@ -8,6 +8,9 @@ import {
 } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
 import './cart.scss';
+import type { CartItemComponent } from './cart-item';
+import { CartItem } from './cart-item';
+import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 
 class CartComponent extends BaseComponent<HTMLDivElement> {
   private readonly cartTitle: BaseComponent<HTMLHeadingElement>;
@@ -23,6 +26,8 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
   private readonly cartButtons: BaseComponent<HTMLDivElement>;
   private readonly clearButton: BaseComponent<HTMLButtonElement>;
   private readonly checkoutButton: BaseComponent<HTMLButtonElement>;
+
+  private items: CartItemComponent[] = [];
 
   constructor(id: string = 'cart-component', className: string = 'cart-component') {
     super(Tags.DIV, id, className);
@@ -41,6 +46,8 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
     this.checkoutButton = this.createCheckoutButton();
 
     this.init();
+
+    this.setItems();
   }
 
   protected renderComponent(): void {
@@ -101,6 +108,25 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
     checkoutButton.setText('Continue to Checkout');
     checkoutButton.addClass('checkout-button');
     return checkoutButton;
+  }
+
+  private async setItems(): Promise<void> {
+    await SdkApi()
+      .getProducts()
+      .then((response) => {
+        this.cartItems.removeChildren();
+        this.items = [];
+
+        const product = response.body?.results[0];
+
+        for (let index = 0; index < 4; index++) {
+          if (product) {
+            const productCard = CartItem(product);
+            this.items.push(productCard);
+            productCard.appendTo(this.cartItems.getElement());
+          }
+        }
+      });
   }
 }
 
