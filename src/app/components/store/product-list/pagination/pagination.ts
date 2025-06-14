@@ -102,13 +102,13 @@ class PaginationComponent extends BaseComponent<HTMLLIElement> {
   }
 
   private renderFullLeftArrow(): void {
-    this.fullLeftImage.setText('<<');
+    this.fullLeftImage.setText('\u2B9C\u2B9C');
     this.fullLeftImage.appendTo(this.fullLeftArrow.getElement());
     this.fullLeftArrow.appendTo(this.getElement());
   }
 
   private renderLeftArrow(): void {
-    this.leftImage.setText('<');
+    this.leftImage.setText('\u2B9C');
     this.leftImage.appendTo(this.leftArrow.getElement());
     this.leftArrow.appendTo(this.getElement());
   }
@@ -142,13 +142,13 @@ class PaginationComponent extends BaseComponent<HTMLLIElement> {
   }
 
   private renderRightArrow(): void {
-    this.rightImage.setText('>');
+    this.rightImage.setText('\u2B9E');
     this.rightImage.appendTo(this.rightArrow.getElement());
     this.rightArrow.appendTo(this.getElement());
   }
 
   private renderFullRightArrow(): void {
-    this.fullRightImage.setText('>>');
+    this.fullRightImage.setText('\u2B9E\u2B9E');
     this.fullRightImage.appendTo(this.fullRightArrow.getElement());
     this.fullRightArrow.appendTo(this.getElement());
   }

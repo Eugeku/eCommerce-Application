@@ -103,7 +103,7 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
     this.defaultPrice.appendTo(this.pricesDiv.getElement());
     if (this.product && this.product.masterVariant && this.product.masterVariant.prices) {
       this.defaultPrice.setText(
-        (this.product.masterVariant.prices[0].value.centAmount / 100 + '$').toString(),
+        ('$' + this.product.masterVariant.prices[0].value.centAmount / 100).toString(),
       );
     }
     this.salePrice.appendTo(this.pricesDiv.getElement());
@@ -114,7 +114,7 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
       this.product.masterVariant.prices[0].discounted
     ) {
       this.salePrice.setText(
-        (this.product.masterVariant.prices[0].discounted.value.centAmount / 100 + '$').toString(),
+        ('$' + this.product.masterVariant.prices[0].discounted.value.centAmount / 100).toString(),
       );
       this.defaultPrice.addClass('discounted');
     }

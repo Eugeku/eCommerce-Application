@@ -15,8 +15,11 @@
     padding: 1rem;
     border-radius: 1rem;
 
-    background: linear-gradient(var(--blue-20), var(--blue-40) 30%);
-    box-shadow: 0 0 1rem 0 var(--white);
+    background: var(
+      --transparent-white-15
+    ); /* linear-gradient(var(--blue-20), var(--blue-40) 30%); */
+
+    box-shadow: 0 0 0.5rem 0 var(--white);
   }
 
   .hero-section {
