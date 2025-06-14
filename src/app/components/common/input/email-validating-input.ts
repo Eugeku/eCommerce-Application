@@ -13,6 +13,9 @@ export class EmailValidatingInput extends BaseValidatingInputComponent {
   ) {
     super(id, className, onInputChangedCallback, labelParameters);
 
+    this.input.setAttribute('name', 'email');
+    this.input.setAttribute('autocomplete', 'on');
+
     this.init();
   }
 

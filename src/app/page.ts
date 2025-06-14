@@ -4,6 +4,7 @@ import { Tags } from '@common-components/tags';
 import { NotFound } from '@components/404/404';
 import { AboutUs } from './components/about-us/about-us';
 import { Cart } from './components/cart/cart';
+import { Footer } from './components/footer/footer';
 import { Header } from './components/header/header';
 import { Login } from './components/login/login';
 import { Main } from './components/main/main';
@@ -27,6 +28,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
   private readonly profile = Profile();
   private modalSlider = ModalSlider();
   private product = ProductPage();
+  private readonly footer = Footer();
   private readonly aboutUs = AboutUs();
   private readonly cart = Cart();
 
@@ -114,7 +116,7 @@ export class PageWrapperComponent extends BaseComponent<HTMLDivElement> {
     this.cart.remove();
     this.modalSlider.remove();
     component.appendTo(this.getElement());
-    // append footer
+    this.footer.appendTo(this.getElement());
   }
 }
 
