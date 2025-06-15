@@ -1,5 +1,6 @@
 import { router } from '@app/router';
 import BaseComponent from '@common-components/base-component';
+import { createDiv } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
 import { NavItem } from './nav-item/nav-item';
 import './nav.scss';
@@ -15,6 +16,7 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
   private readonly registerBtn: BaseComponent<HTMLButtonElement>;
   private readonly profileBtn: BaseComponent<HTMLButtonElement>;
   private readonly logoutBtn: BaseComponent<HTMLButtonElement>;
+  private readonly cartCounter: BaseComponent<HTMLDivElement>;
 
   constructor(id: string = 'nav-component', className: string = 'nav-component') {
     super(Tags.DIV, id, className);
@@ -26,6 +28,7 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
     this.registerBtn = NavItem('register', 'button nav-item', 'register', 'Register');
     this.profileBtn = NavItem('profile', 'button nav-item', 'profile', 'Profile');
     this.logoutBtn = NavItem('logout', 'button nav-item', 'logout', 'Logout');
+    this.cartCounter = createDiv(undefined, 'cart-counter');
 
     this.init();
   }
@@ -35,6 +38,8 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
     this.storeBtn.appendTo(this.getElement());
     this.aboutUsBtn.appendTo(this.getElement());
     this.cartBtn.appendTo(this.getElement());
+    this.cartCounter.appendTo(this.cartBtn.getElement());
+    this.cartCounter.setText('0');
     this.renderLoginLogout(SdkApi().isLoggedIn());
   }
 
