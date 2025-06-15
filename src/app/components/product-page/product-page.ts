@@ -16,17 +16,31 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
   private totalImages: number;
   private currentImage: number;
   private readonly product: ProductProjection | undefined;
+
   private readonly wrapper: BaseComponent<HTMLDivElement>;
+
   private readonly textsContainer: BaseComponent<HTMLDivElement>;
   private readonly h3: BaseComponent<HTMLHeadingElement>;
   private readonly description: BaseComponent<HTMLParagraphElement>;
+
+  private readonly attributesContainer: BaseComponent<HTMLDivElement>;
+
   private readonly sliderSmall: BaseComponent<HTMLDivElement>;
   private readonly imagesContainer: BaseComponent<HTMLDivElement>;
+  private readonly buttonLeft: BaseComponent<HTMLButtonElement>;
+  private readonly buttonRight: BaseComponent<HTMLButtonElement>;
+
   private readonly pricesDiv: BaseComponent<HTMLDivElement>;
   private readonly defaultPrice: BaseComponent<HTMLParagraphElement>;
   private readonly salePrice: BaseComponent<HTMLParagraphElement>;
-  private readonly buttonLeft: BaseComponent<HTMLButtonElement>;
-  private readonly buttonRight: BaseComponent<HTMLButtonElement>;
+
+  private readonly cartButtonsContainer: BaseComponent<HTMLDivElement>;
+  private readonly addToCartButton: BaseComponent<HTMLButtonElement>;
+  private readonly quantityControls: BaseComponent<HTMLDivElement>;
+  private readonly plusButton: BaseComponent<HTMLButtonElement>;
+  private readonly counter: BaseComponent<HTMLDivElement>;
+  private readonly minusButton: BaseComponent<HTMLButtonElement>;
+
   private readonly buttonBack: BaseComponent<HTMLButtonElement>;
 
   constructor(
@@ -38,16 +52,29 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
     this.product = product;
 
     this.wrapper = createDiv(undefined, 'wrapper');
+
     this.textsContainer = createDiv(undefined, 'texts-container');
     this.h3 = createH3(undefined, 'heading-3');
     this.description = createP(undefined, 'description');
+
+    this.attributesContainer = createDiv(undefined, 'attributes-container');
+
     this.sliderSmall = createDiv(undefined, 'slider-small');
     this.imagesContainer = createDiv(undefined, 'images-container');
+    this.buttonLeft = createButton(undefined, 'button-left');
+    this.buttonRight = createButton(undefined, 'button-right');
+
     this.pricesDiv = createDiv(undefined, 'prices-container');
     this.defaultPrice = createP(undefined, 'default-price');
     this.salePrice = createP(undefined, 'sale-price');
-    this.buttonLeft = createButton(undefined, 'button-left');
-    this.buttonRight = createButton(undefined, 'button-right');
+
+    this.cartButtonsContainer = createDiv(undefined, 'cart-buttons-container');
+    this.addToCartButton = createButton(undefined, 'add-to-cart-button');
+    this.quantityControls = createDiv(undefined, 'quantity-controls hidden');
+    this.plusButton = createButton(undefined, 'quantity-button');
+    this.counter = createDiv(undefined, 'counter');
+    this.minusButton = createButton(undefined, 'quantity-button');
+
     this.buttonBack = createButton(undefined, 'button-back');
 
     this.totalImages = 0;
@@ -78,9 +105,45 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
     }
   }
 
+  protected addEventListenerAddToCartButton(): void {
+    this.addToCartButton.addEventListener('click', () => {
+      console.log('Added Item to Cart for the first time: ' + this.h3.getElement().textContent);
+      // add item to cart
+      // change counter
+      this.addToCartButton.addClass('hidden');
+      this.quantityControls.removeClass('hidden');
+    });
+  }
+
+  protected addEventListenerMinusButton(): void {
+    this.minusButton.addEventListener('click', () => {
+      console.log('Removed Item: ' + this.h3.getElement().textContent);
+      // remove item from cart
+      // change counter
+      // check for (quantity <= 0), if true show addToCartButton and hide quantityControls
+    });
+  }
+
+  protected addEventListenerPlusButton(): void {
+    this.plusButton.addEventListener('click', () => {
+      console.log('Added Item: ' + this.h3.getElement().textContent);
+      // check available amount of products, if true
+      //then
+      // add item to cart
+      // change counter
+      //else
+      // show error
+    });
+  }
+
   protected addEventListeners(): void {
     this.addEventListenerLeftButton();
     this.addEventListenerRightButton();
+
+    this.addEventListenerAddToCartButton();
+    this.addEventListenerMinusButton();
+    this.addEventListenerPlusButton();
+
     this.addEventListenerBackButton();
   }
 
@@ -120,10 +183,37 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
     }
   }
 
+  private renderAttributesContainer(): void {
+    this.attributesContainer.appendTo(this.textsContainer.getElement());
+  }
+
+  private renderCartButtons(): void {
+    this.cartButtonsContainer.appendTo(this.textsContainer.getElement());
+    this.renderAddToCartButton();
+    this.renderQuantityControls();
+  }
+
+  private renderAddToCartButton(): void {
+    this.addToCartButton.setText('Add to cart');
+    this.addToCartButton.appendTo(this.cartButtonsContainer.getElement());
+  }
+
+  private renderQuantityControls(): void {
+    this.quantityControls.appendTo(this.cartButtonsContainer.getElement());
+    this.minusButton.appendTo(this.quantityControls.getElement());
+    this.minusButton.setText('-');
+    this.counter.appendTo(this.quantityControls.getElement());
+    this.counter.setText('0');
+    this.plusButton.appendTo(this.quantityControls.getElement());
+    this.plusButton.setText('+');
+  }
+
   private renderTextsContainer(): void {
     this.renderHeading3();
     this.renderDescription();
+    this.renderAttributesContainer();
     this.renderPrices();
+    this.renderCartButtons();
     this.textsContainer.appendTo(this.wrapper.getElement());
   }
 
