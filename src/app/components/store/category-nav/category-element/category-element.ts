@@ -56,9 +56,13 @@ class CategoryElementComponent extends BaseComponent<HTMLLIElement> {
 
   private renderCategoryName(): void {
     if (typeof this.category !== 'string' && this.category.name['en-US']) {
-      this.categoryName.setText(this.category.name['en-US'].toUpperCase());
+      this.categoryName.setText(
+        this.category.name['en-US'][0].toUpperCase() + this.category.name['en-US'].slice(1),
+      );
     } else {
-      this.categoryName.setText(this.category.toString().toUpperCase());
+      this.categoryName.setText(
+        this.category.toString()[0].toUpperCase() + this.category.toString().slice(1),
+      );
     }
     this.categoryName.appendTo(this.getElement());
   }

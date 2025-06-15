@@ -20,7 +20,7 @@ class ProductListComponent extends BaseComponent<HTMLDivElement> {
     this.searchOptions = {
       filter: [],
       sort: ['name.en-US asc'],
-      limit: 10,
+      limit: 12,
       offset: 0,
     };
 
@@ -28,6 +28,15 @@ class ProductListComponent extends BaseComponent<HTMLDivElement> {
 
     this.init();
   }
+
+  /*
+  public stopPropagation(): void {
+    const stopPropag = function(event) {
+      event.stopPropagation();
+    };
+    this.addEventListener('click', stopPropag);
+  }
+  */
 
   protected renderComponent(): void {
     this.renderProductCardWrapper();

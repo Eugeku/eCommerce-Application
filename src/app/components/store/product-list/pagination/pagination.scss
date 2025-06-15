@@ -17,18 +17,24 @@
 
     width: 52px;
     height: 52px;
-    border-radius: 100px;
+    border: none;
+    border-radius: 5rem;
 
-    background: var(--beige);
+    color: var(--beige);
+
+    background: transparent;
 
     transition: 0.4s ease-in-out;
 
-    &.active {
-      border: 2px solid var(--beige);
+    &:disabled {
+      opacity: 0.3;
     }
 
     &:hover {
-      background-color: var(--transparent-white-30);
+      &:not(:disabled) {
+        opacity: 1;
+        background-color: var(--transparent-white-30);
+      }
     }
 
     span {
@@ -37,6 +43,11 @@
       line-height: 115%;
       text-align: center;
       letter-spacing: 0.06em;
+    }
+
+    &.current-page {
+      cursor: default;
+      background-color: var(--transparent-white-30);
     }
   }
 }

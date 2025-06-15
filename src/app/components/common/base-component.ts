@@ -87,6 +87,12 @@ export default abstract class BaseComponent<T extends HTMLElement> {
     this.element.classList.remove(className);
   }
 
+  public stopPropagation(): void {
+    this.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
+  }
+
   private setAttributes(): void {
     if (this.id) {
       this.element.id = this.id;
