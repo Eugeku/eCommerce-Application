@@ -29,15 +29,6 @@ class ProductListComponent extends BaseComponent<HTMLDivElement> {
     this.init();
   }
 
-  /*
-  public stopPropagation(): void {
-    const stopPropag = function(event) {
-      event.stopPropagation();
-    };
-    this.addEventListener('click', stopPropag);
-  }
-  */
-
   protected renderComponent(): void {
     this.renderProductCardWrapper();
     this.renderProductListBySearchOptions();

@@ -5,10 +5,10 @@ import {
   createH3,
   createP,
   createDiv,
-  createImg,
   createButton,
 } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
+import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 import './product-page.scss';
 
@@ -16,32 +16,27 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
   private totalImages: number;
   private currentImage: number;
   private readonly product: ProductProjection | undefined;
-
   private readonly wrapper: BaseComponent<HTMLDivElement>;
-
   private readonly textsContainer: BaseComponent<HTMLDivElement>;
   private readonly h3: BaseComponent<HTMLHeadingElement>;
   private readonly description: BaseComponent<HTMLParagraphElement>;
-
   private readonly attributesContainer: BaseComponent<HTMLDivElement>;
-
   private readonly sliderSmall: BaseComponent<HTMLDivElement>;
   private readonly imagesContainer: BaseComponent<HTMLDivElement>;
   private readonly buttonLeft: BaseComponent<HTMLButtonElement>;
   private readonly buttonRight: BaseComponent<HTMLButtonElement>;
-
   private readonly pricesDiv: BaseComponent<HTMLDivElement>;
   private readonly defaultPrice: BaseComponent<HTMLParagraphElement>;
   private readonly salePrice: BaseComponent<HTMLParagraphElement>;
-
   private readonly cartButtonsContainer: BaseComponent<HTMLDivElement>;
   private readonly addToCartButton: BaseComponent<HTMLButtonElement>;
   private readonly quantityControls: BaseComponent<HTMLDivElement>;
   private readonly plusButton: BaseComponent<HTMLButtonElement>;
   private readonly counter: BaseComponent<HTMLDivElement>;
   private readonly minusButton: BaseComponent<HTMLButtonElement>;
-
   private readonly buttonBack: BaseComponent<HTMLButtonElement>;
+
+  private productQuantity: number = 0;
 
   constructor(
     id: string = 'product-page-component',
@@ -50,36 +45,29 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
   ) {
     super(Tags.DIV, id, className);
     this.product = product;
-
     this.wrapper = createDiv(undefined, 'wrapper');
-
     this.textsContainer = createDiv(undefined, 'texts-container');
     this.h3 = createH3(undefined, 'heading-3');
     this.description = createP(undefined, 'description');
-
     this.attributesContainer = createDiv(undefined, 'attributes-container');
-
     this.sliderSmall = createDiv(undefined, 'slider-small');
     this.imagesContainer = createDiv(undefined, 'images-container');
     this.buttonLeft = createButton(undefined, 'button-left');
     this.buttonRight = createButton(undefined, 'button-right');
-
     this.pricesDiv = createDiv(undefined, 'prices-container');
     this.defaultPrice = createP(undefined, 'default-price');
     this.salePrice = createP(undefined, 'sale-price');
-
     this.cartButtonsContainer = createDiv(undefined, 'cart-buttons-container');
     this.addToCartButton = createButton(undefined, 'add-to-cart-button');
     this.quantityControls = createDiv(undefined, 'quantity-controls hidden');
     this.plusButton = createButton(undefined, 'quantity-button');
     this.counter = createDiv(undefined, 'counter');
     this.minusButton = createButton(undefined, 'quantity-button');
-
     this.buttonBack = createButton(undefined, 'button-back');
-
     this.totalImages = 0;
     this.currentImage = 0;
 
+    this.initQuantityFromCart();
     this.init();
   }
 
@@ -88,63 +76,100 @@ class ProductPageComponent extends BaseComponent<HTMLDivElement> {
     this.renderBackButton();
   }
 
-  protected renderWrapper(): void {
+  protected addEventListeners(): void {
+    this.addEventListenerLeftButton();
+    this.addEventListenerRightButton();
+    this.addEventListenerAddToCartButton();
+    this.addEventListenerMinusButton();
+    this.addEventListenerPlusButton();
+    this.addEventListenerBackButton();
+  }
+
+  private addEventListenerAddToCartButton(): void {
+    this.addToCartButton.addEventListener('click', async () => {
+      if (this.product) {
+        const result = await SdkApi().addLineItemToCart(
+          this.product.id,
+          this.product.masterVariant.id,
+        );
+        if (result.body) {
+          PublishSubscriber().publish('updateCart', { cart: result.body });
+        }
+      }
+      this.initQuantityFromCart();
+    });
+  }
+
+  private addEventListenerMinusButton(): void {
+    this.minusButton.addEventListener('click', async () => {
+      if (this.product) {
+        await SdkApi()
+          .getLineItemByProductId(this.product.id, this.product.masterVariant.id)
+          .then(async (lineItem) => {
+            if (lineItem) {
+              this.productQuantity--;
+              const result = await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+              if (result.body) {
+                PublishSubscriber().publish('updateCart', { cart: result.body });
+              }
+            }
+          });
+      }
+      this.initQuantityFromCart();
+    });
+  }
+
+  private addEventListenerPlusButton(): void {
+    this.plusButton.addEventListener('click', async () => {
+      if (this.product) {
+        await SdkApi()
+          .getLineItemByProductId(this.product.id, this.product.masterVariant.id)
+          .then(async (lineItem) => {
+            if (lineItem) {
+              this.productQuantity++;
+              const result = await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+              if (result.body) {
+                PublishSubscriber().publish('updateCart', { cart: result.body });
+              }
+            }
+          });
+      }
+      this.initQuantityFromCart();
+    });
+  }
+
+  private async initQuantityFromCart(): Promise<void> {
+    if (this.product) {
+      this.productQuantity = await SdkApi().getProductQuantityInCart(
+        this.product.id,
+        this.product.masterVariant.id,
+      );
+    }
+    if (this.productQuantity > 0) {
+      this.addToCartButton.addClass('hidden');
+      this.quantityControls.removeClass('hidden');
+      this.counter.setText(this.productQuantity.toString());
+    } else {
+      this.addToCartButton.removeClass('hidden');
+      this.quantityControls.addClass('hidden');
+    }
+  }
+
+  private renderWrapper(): void {
     this.renderSliderSmall();
     this.renderTextsContainer();
     this.wrapper.appendTo(this.getElement());
   }
 
-  protected renderBackButton(): void {
+  private renderBackButton(): void {
     this.buttonBack.appendTo(this.getElement());
     this.buttonBack.setText('Back');
   }
 
-  protected openModalSlider(): void {
+  private openModalSlider(): void {
     if (this.product) {
       PublishSubscriber().publish('openModalSlider', { product: this.product });
     }
-  }
-
-  protected addEventListenerAddToCartButton(): void {
-    this.addToCartButton.addEventListener('click', () => {
-      console.log('Added Item to Cart for the first time: ' + this.h3.getElement().textContent);
-      // add item to cart
-      // change counter
-      this.addToCartButton.addClass('hidden');
-      this.quantityControls.removeClass('hidden');
-    });
-  }
-
-  protected addEventListenerMinusButton(): void {
-    this.minusButton.addEventListener('click', () => {
-      console.log('Removed Item: ' + this.h3.getElement().textContent);
-      // remove item from cart
-      // change counter
-      // check for (quantity <= 0), if true show addToCartButton and hide quantityControls
-    });
-  }
-
-  protected addEventListenerPlusButton(): void {
-    this.plusButton.addEventListener('click', () => {
-      console.log('Added Item: ' + this.h3.getElement().textContent);
-      // check available amount of products, if true
-      //then
-      // add item to cart
-      // change counter
-      //else
-      // show error
-    });
-  }
-
-  protected addEventListeners(): void {
-    this.addEventListenerLeftButton();
-    this.addEventListenerRightButton();
-
-    this.addEventListenerAddToCartButton();
-    this.addEventListenerMinusButton();
-    this.addEventListenerPlusButton();
-
-    this.addEventListenerBackButton();
   }
 
   private renderHeading3(): void {

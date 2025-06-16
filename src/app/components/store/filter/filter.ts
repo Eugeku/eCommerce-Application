@@ -58,7 +58,6 @@ class FilterComponent extends BaseComponent<HTMLDivElement> {
     this.select.addEventListener('change', () => {
       const value = this.select.getElement().value;
       PublishSubscriber().publish('sort', { text: value });
-      console.log(value);
     });
   }
 }

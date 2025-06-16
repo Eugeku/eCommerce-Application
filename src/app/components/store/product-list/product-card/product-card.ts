@@ -8,6 +8,8 @@ import {
 } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
 import './product-card.scss';
+import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
+import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 
 class ProductCardComponent extends BaseComponent<HTMLDivElement> {
   public readonly product: ProductProjection;
@@ -26,6 +28,8 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
   private readonly counter: BaseComponent<HTMLDivElement>;
   private readonly minusButton: BaseComponent<HTMLButtonElement>;
 
+  private productQuantity: number = 0;
+
   constructor(
     id: string = '',
     className: string = 'product-card-component',
@@ -34,38 +38,31 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
     super(Tags.DIV, id, className);
     this.product = product;
     this.cardWrapper = createDiv(undefined, 'product-card-wrapper');
-
     this.productImage = createDiv(undefined, 'product-card-image');
     this.productCardControls = createDiv(undefined, 'product-card-controls');
-
     this.productCardPriceWrapper = createDiv(undefined, 'product-card-price-wrapper');
     this.productPrice = createDiv(undefined, 'product-card-price');
     this.productSalesPrice = createDiv(undefined, 'product-card-sales-price');
-
     this.addToCartButton = createButton(undefined, 'add-to-cart-button');
-
     this.quantityControls = createDiv(undefined, 'quantity-controls hidden');
     this.plusButton = createButton(undefined, 'quantity-button');
     this.counter = createDiv(undefined, 'counter');
     this.minusButton = createButton(undefined, 'quantity-button');
-
     this.productTextWrapper = createDiv(undefined, 'product-card-text-wrapper');
     this.productText = createH2(undefined, 'product-card-text');
     this.productDescription = createP(undefined, 'product-card-description');
-
+    this.initQuantityFromCart();
     this.init();
   }
 
   protected renderComponent(): void {
     this.renderCardWrapper();
     this.renderProductImage();
-
     this.renderProductCardControls();
     this.renderProductPriceWrapper();
     this.renderProductPrice();
     this.renderAddToCartButton();
     this.renderQuantityControls();
-
     this.renderProductTextWrapper();
     this.renderProductText();
     this.renderProductDescription();
@@ -75,40 +72,90 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
     this.addEventListenerAddToCartButton();
     this.addEventListenerMinusButton();
     this.addEventListenerPlusButton();
+    this.updateCartEventListener();
+    this.loginEventListener();
+    this.logoutEventListener();
   }
 
-  protected addEventListenerAddToCartButton(): void {
-    this.addToCartButton.addEventListener('click', () => {
-      console.log(
-        'Added Item to Cart for the first time: ' + this.productText.getElement().textContent,
-      );
-      // add item to cart
-      // change counter
+  private updateCartEventListener(): void {
+    PublishSubscriber().subscribe('updateCart', (cart) => {
+      this.initQuantityFromCart();
+    });
+  }
+
+  private loginEventListener(): void {
+    PublishSubscriber().subscribe('userLoggedIn', (cart) => {
+      this.initQuantityFromCart();
+    });
+  }
+
+  private logoutEventListener(): void {
+    PublishSubscriber().subscribe('userLoggedOut', (cart) => {
+      this.initQuantityFromCart();
+    });
+  }
+
+  private async initQuantityFromCart(): Promise<void> {
+    this.productQuantity = await SdkApi().getProductQuantityInCart(
+      this.product.id,
+      this.product.masterVariant.id,
+    );
+    if (this.productQuantity > 0) {
       this.addToCartButton.addClass('hidden');
       this.quantityControls.removeClass('hidden');
+      this.counter.setText(this.productQuantity.toString());
+    } else {
+      this.addToCartButton.removeClass('hidden');
+      this.quantityControls.addClass('hidden');
+    }
+  }
+
+  private addEventListenerAddToCartButton(): void {
+    this.addToCartButton.addEventListener('click', async () => {
+      const result = await SdkApi().addLineItemToCart(
+        this.product.id,
+        this.product.masterVariant.id,
+      );
+      if (result.body) {
+        PublishSubscriber().publish('updateCart', { cart: result.body });
+      }
+      this.initQuantityFromCart();
     });
     this.addToCartButton.stopPropagation();
   }
 
-  protected addEventListenerMinusButton(): void {
-    this.minusButton.addEventListener('click', () => {
-      console.log('Removed Item: ' + this.productText.getElement().textContent);
-      // remove item from cart
-      // change counter
-      // check for (quantity <= 0), if true show addToCartButton and hide quantityControls
+  private addEventListenerMinusButton(): void {
+    this.minusButton.addEventListener('click', async () => {
+      await SdkApi()
+        .getLineItemByProductId(this.product.id, this.product.masterVariant.id)
+        .then(async (lineItem) => {
+          if (lineItem) {
+            this.productQuantity--;
+            const result = await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+            if (result.body) {
+              PublishSubscriber().publish('updateCart', { cart: result.body });
+            }
+          }
+        });
+      this.initQuantityFromCart();
     });
     this.minusButton.stopPropagation();
   }
 
-  protected addEventListenerPlusButton(): void {
-    this.plusButton.addEventListener('click', () => {
-      console.log('Added Item: ' + this.productText.getElement().textContent);
-      // check available amount of products, if true
-      //then
-      // add item to cart
-      // change counter
-      //else
-      // show error
+  private addEventListenerPlusButton(): void {
+    this.plusButton.addEventListener('click', async () => {
+      await SdkApi()
+        .getLineItemByProductId(this.product.id, this.product.masterVariant.id)
+        .then(async (lineItem) => {
+          if (lineItem) {
+            this.productQuantity++;
+            const result = await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+            if (result.body) {
+              PublishSubscriber().publish('updateCart', { cart: result.body });
+            }
+          }
+        });
+      this.initQuantityFromCart();
     });
     this.plusButton.stopPropagation();
   }
@@ -165,7 +212,7 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
     this.minusButton.appendTo(this.quantityControls.getElement());
     this.minusButton.setText('-');
     this.counter.appendTo(this.quantityControls.getElement());
-    this.counter.setText('0');
+    this.counter.setText(this.productQuantity.toString());
     this.plusButton.appendTo(this.quantityControls.getElement());
     this.plusButton.setText('+');
   }

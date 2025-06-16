@@ -3,9 +3,9 @@ import BaseComponent from '@common-components/base-component';
 import { createDiv } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
 import { NavItem } from './nav-item/nav-item';
-import './nav.scss';
 import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
+import './nav.scss';
 
 class NavComponent extends BaseComponent<HTMLDivElement> {
   private readonly homeBtn: BaseComponent<HTMLButtonElement>;
@@ -38,8 +38,7 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
     this.storeBtn.appendTo(this.getElement());
     this.aboutUsBtn.appendTo(this.getElement());
     this.cartBtn.appendTo(this.getElement());
-    this.cartCounter.appendTo(this.cartBtn.getElement());
-    this.cartCounter.setText('0');
+    this.renderCartCounter();
     this.renderLoginLogout(SdkApi().isLoggedIn());
   }
 
@@ -75,16 +74,32 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
     this.logoutBtn.addEventListener('click', () => {
       SdkApi().logoutUser();
       this.renderLoginLogout(SdkApi().isLoggedIn());
+      PublishSubscriber().publish('userLoggedOut', { userId: '' });
       PublishSubscriber().publish('hideBurger', {});
       router.navigate('#/main');
     });
 
     this.addLoginEventListener();
+    this.addCartUpdateEventListener();
   }
 
   private addLoginEventListener(): void {
     PublishSubscriber().subscribe('userLoggedIn', () => {
       this.renderLoginLogout(true);
+    });
+  }
+
+  private addCartUpdateEventListener(): void {
+    PublishSubscriber().subscribe('updateCart', (cart) => {
+      this.updateCartCounter(cart.cart.lineItems.length);
+    });
+
+    PublishSubscriber().subscribe('userLoggedOut', () => {
+      this.loadCartNumber();
+    });
+
+    PublishSubscriber().subscribe('userLoggedIn', () => {
+      this.loadCartNumber();
     });
   }
 
@@ -100,6 +115,27 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
       this.loginBtn.appendTo(this.getElement());
       this.registerBtn.appendTo(this.getElement());
     }
+  }
+
+  private renderCartCounter(): void {
+    this.cartCounter.appendTo(this.cartBtn.getElement());
+    this.loadCartNumber();
+  }
+
+  private loadCartNumber(): void {
+    SdkApi()
+      .getCart()
+      .then((cart) => {
+        if (cart.body) {
+          this.updateCartCounter(cart.body.lineItems.length);
+        } else {
+          this.updateCartCounter(0);
+        }
+      });
+  }
+
+  private updateCartCounter(counter: number = 0): void {
+    this.cartCounter.setText(counter.toString());
   }
 }
 

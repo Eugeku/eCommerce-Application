@@ -2,7 +2,6 @@
   flex-direction: column;
   max-width: 1440px;
   margin: auto;
-  padding: 2rem;
 
   .cart-title {
     margin-bottom: 2rem;
@@ -33,7 +32,7 @@
       .cart-item-component {
         display: flex;
         align-items: center;
-        justify-content: space-around;
+        justify-content: space-between;
 
         padding-bottom: 1rem;
         border-bottom: 1px solid #ddd;
@@ -68,7 +67,7 @@
           flex-shrink: 0;
           gap: 0.5rem;
 
-          width: fit-content;
+          width: 10rem;
 
           .quantity-counter {
             overflow: hidden;
@@ -212,6 +211,13 @@
 
         &:hover {
           background-color: var(--transparent-white-30);
+        }
+
+        &:disabled {
+          cursor: not-allowed;
+          color: var(--transparent-white-50);
+          background: var(--transparent-white-15);
+          box-shadow: 0 0 0.2rem 0 var(--white);
         }
       }
     }
