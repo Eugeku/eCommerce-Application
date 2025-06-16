@@ -5,10 +5,11 @@ import {
   createApiBuilderFromCtpClient,
   type Customer,
   type LineItem,
+  type MyCartUpdateAction,
   type MyCustomerUpdateAction,
   type ProductProjectionPagedSearchResponse,
 } from '@commercetools/platform-sdk';
-import { type QueryParam, type ClientResponse } from '@commercetools/ts-client';
+import type { QueryParam, ClientResponse } from '@commercetools/ts-client';
 import { CustomerBuilder } from '@utils/api/bean/customer-builder';
 import { ApiClient } from '@utils/api/build-client';
 import { clearTokens, UserCache } from '@utils/api/token-cache';
@@ -331,8 +332,13 @@ class CommerceSdkApi {
     return cart;
   }
 
-  public async removeLineItemFromCart(lineItemId: string): Promise<ClientResponse<Cart>> {
+  public async removeLineItemFromCart(lineItemIds: string[]): Promise<ClientResponse<Cart>> {
     const cart = await this.getCart();
+
+    const removeActions: MyCartUpdateAction[] = lineItemIds.map((lineItemId) => ({
+      action: 'removeLineItem',
+      lineItemId,
+    }));
 
     if (cart.body) {
       return this.apiRoot
@@ -342,12 +348,7 @@ class CommerceSdkApi {
         .post({
           body: {
             version: cart.body.version,
-            actions: [
-              {
-                action: 'removeLineItem',
-                lineItemId,
-              },
-            ],
+            actions: removeActions,
           },
         })
         .execute();

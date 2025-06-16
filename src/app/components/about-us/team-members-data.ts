@@ -1,5 +1,5 @@
 export const Evgenii = {
-  avatarSource: '/assets/avatars/Avatar-Evgenii.png',
+  avatarSource: './assets/avatars/Avatar-Evgenii.png',
   avatarAlt: 'Evgenii avatar',
   name: 'Yauhen',
   role: 'Team Lead / Developer',
@@ -16,7 +16,7 @@ export const Evgenii = {
 };
 
 export const Tatiana = {
-  avatarSource: '/assets/avatars/Avatar-Tatiana.png',
+  avatarSource: './assets/avatars/Avatar-Tatiana.png',
   avatarAlt: 'Tatiana avatar',
   name: 'Tatiana',
   role: 'Project Coordinator / Developer',
@@ -33,7 +33,7 @@ export const Tatiana = {
 };
 
 export const Mariia = {
-  avatarSource: '/assets/avatars/Avatar-Mariia.png',
+  avatarSource: './assets/avatars/Avatar-Mariia.png',
   avatarAlt: 'Mariia avatar',
   name: 'Mariia',
   role: 'UI/UX Designer / Developer',

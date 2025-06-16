@@ -15,10 +15,7 @@
     padding: 1rem;
     border-radius: 1rem;
 
-    background: var(
-      --transparent-white-15
-    ); /* linear-gradient(var(--blue-20), var(--blue-40) 30%); */
-
+    background: var(--transparent-white-15);
     box-shadow: 0 0 0.5rem 0 var(--white);
   }
 
@@ -78,7 +75,7 @@
         width: 1rem;
         height: 1rem;
 
-        background-image: url('./assets/icons/copy.png');
+        background-image: url('../assets/icons/copy.png');
         background-position: center;
         background-size: contain;
       }
