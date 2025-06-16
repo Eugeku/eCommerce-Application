@@ -195,6 +195,7 @@ class CommerceSdkApi {
   public logoutUser(): void {
     clearTokens();
     UserCache.clearUser();
+    UserCache.clearAnonymousId();
     this.withAnonymousSessionFlow();
   }
 
@@ -264,6 +265,14 @@ class CommerceSdkApi {
         item.productId === productId && (variantId === undefined || item.variant.id === variantId),
     );
 
+    return lineItem;
+  }
+
+  public async getLineItemByLineItemId(lineItemId: string): Promise<LineItem | undefined> {
+    const cartResponse = await this.getCart();
+    const cart = cartResponse.body;
+    if (!cart || !cart.lineItems) return undefined;
+    const lineItem: LineItem | undefined = cart.lineItems.find((item) => item.id === lineItemId);
     return lineItem;
   }
 
@@ -337,6 +346,29 @@ class CommerceSdkApi {
               {
                 action: 'removeLineItem',
                 lineItemId,
+              },
+            ],
+          },
+        })
+        .execute();
+    }
+    return cart;
+  }
+
+  public async applyDiscountCodeToCart(code: string): Promise<ClientResponse<Cart>> {
+    const cart = await this.getCart();
+    if (cart.body) {
+      return this.apiRoot
+        .me()
+        .carts()
+        .withId({ ID: cart.body.id })
+        .post({
+          body: {
+            version: cart.body.version,
+            actions: [
+              {
+                action: 'addDiscountCode',
+                code,
               },
             ],
           },

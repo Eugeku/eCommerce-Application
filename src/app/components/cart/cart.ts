@@ -7,10 +7,10 @@ import {
   createP,
 } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
-import './cart.scss';
-import type { CartItemComponent } from './cart-item';
 import { CartItem } from './cart-item';
 import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
+import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
+import './cart.scss';
 
 class CartComponent extends BaseComponent<HTMLDivElement> {
   private readonly cartTitle: BaseComponent<HTMLHeadingElement>;
@@ -66,7 +66,36 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
     this.checkoutButton.appendTo(this.cartButtons.getElement());
   }
 
-  protected addEventListeners(): void {}
+  protected addEventListeners(): void {
+    this.addUserLoginEventListener();
+    this.updateCartEventListener();
+    this.addApplyButtonListener();
+  }
+
+  private addUserLoginEventListener(): void {
+    PublishSubscriber().subscribe('userLoggedIn', (userId) => {
+      this.setItems();
+      this.setTotalPrice();
+      this.setOriginalPrice();
+    });
+  }
+
+  private updateCartEventListener(): void {
+    PublishSubscriber().subscribe('updateCart', (cart) => {
+      this.setItems();
+      this.setTotalPrice();
+      this.setOriginalPrice();
+    });
+  }
+
+  private addApplyButtonListener(): void {
+    this.applyButton.addEventListener('click', async () => {
+      await SdkApi().applyDiscountCodeToCart(this.promoInput.getElement().value);
+      this.setItems();
+      this.setTotalPrice();
+      this.setOriginalPrice();
+    });
+  }
 
   private renderCartTitle(): void {
     this.cartTitle.setText('Your Shopping Cart');
@@ -87,13 +116,38 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
   }
 
   private renderOriginalPrice(): void {
-    this.originalPrice.setText('Original price: $159.97');
+    this.setOriginalPrice();
     this.originalPrice.appendTo(this.priceInfo.getElement());
   }
 
   private renderDiscountedPrice(): void {
-    this.discountedPrice.setText('Total price: $143.97');
+    this.setTotalPrice();
     this.discountedPrice.appendTo(this.priceInfo.getElement());
+  }
+
+  private async setTotalPrice(): Promise<void> {
+    const cart = await SdkApi().getCart();
+    if (cart.body) {
+      this.discountedPrice.setText(`Total price: $${cart.body.totalPrice.centAmount / 100}`);
+    } else {
+      this.discountedPrice.setText('Total price: $0');
+    }
+  }
+
+  private async setOriginalPrice(): Promise<void> {
+    const cart = await SdkApi().getCart();
+    if (cart.body && cart.body.discountCodes.length > 0 && cart.body.discountOnTotalPrice) {
+      const discountAmount = cart.body.discountOnTotalPrice.discountedAmount.centAmount / 100;
+      const originalPrice = cart.body.totalPrice.centAmount / 100;
+      this.originalPrice.setText(`Original price: $${discountAmount + originalPrice}`);
+      this.originalPrice.removeClass('hidden');
+      this.promoInput.setAttribute('disabled', 'true');
+      this.applyButton.setAttribute('disabled', 'true');
+    } else {
+      this.originalPrice.addClass('hidden');
+      this.promoInput.removeAttribute('disabled');
+      this.applyButton.removeAttribute('disabled');
+    }
   }
 
   private createClearButton(): BaseComponent<HTMLButtonElement> {
@@ -112,20 +166,18 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
 
   private async setItems(): Promise<void> {
     await SdkApi()
-      .getProducts()
+      .getCart()
       .then((response) => {
         this.cartItems.removeChildren();
         this.items = [];
-
-        const product = response.body?.results[0];
-
-        for (let index = 0; index < 4; index++) {
-          if (product) {
-            const productCard = CartItem(product);
-            this.items.push(productCard);
-            productCard.appendTo(this.cartItems.getElement());
+        const lineItems = response.body?.lineItems;
+        lineItems?.map((lineItem) => {
+          if (lineItem) {
+            const cartItem = CartItem(lineItem);
+            this.items.push(cartItem);
+            cartItem.appendTo(this.cartItems.getElement());
           }
-        }
+        });
       });
   }
 }

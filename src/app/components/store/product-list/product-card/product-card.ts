@@ -9,6 +9,7 @@ import {
 import { Tags } from '@common-components/tags';
 import './product-card.scss';
 import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
+import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 
 class ProductCardComponent extends BaseComponent<HTMLDivElement> {
   public readonly product: ProductProjection;
@@ -37,25 +38,19 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
     super(Tags.DIV, id, className);
     this.product = product;
     this.cardWrapper = createDiv(undefined, 'product-card-wrapper');
-
     this.productImage = createDiv(undefined, 'product-card-image');
     this.productCardControls = createDiv(undefined, 'product-card-controls');
-
     this.productCardPriceWrapper = createDiv(undefined, 'product-card-price-wrapper');
     this.productPrice = createDiv(undefined, 'product-card-price');
     this.productSalesPrice = createDiv(undefined, 'product-card-sales-price');
-
     this.addToCartButton = createButton(undefined, 'add-to-cart-button');
-
     this.quantityControls = createDiv(undefined, 'quantity-controls hidden');
     this.plusButton = createButton(undefined, 'quantity-button');
     this.counter = createDiv(undefined, 'counter');
     this.minusButton = createButton(undefined, 'quantity-button');
-
     this.productTextWrapper = createDiv(undefined, 'product-card-text-wrapper');
     this.productText = createH2(undefined, 'product-card-text');
     this.productDescription = createP(undefined, 'product-card-description');
-
     this.initQuantityFromCart();
     this.init();
   }
@@ -63,13 +58,11 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
   protected renderComponent(): void {
     this.renderCardWrapper();
     this.renderProductImage();
-
     this.renderProductCardControls();
     this.renderProductPriceWrapper();
     this.renderProductPrice();
     this.renderAddToCartButton();
     this.renderQuantityControls();
-
     this.renderProductTextWrapper();
     this.renderProductText();
     this.renderProductDescription();
@@ -79,6 +72,27 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
     this.addEventListenerAddToCartButton();
     this.addEventListenerMinusButton();
     this.addEventListenerPlusButton();
+    this.updateCartEventListener();
+    this.loginEventListener();
+    this.logoutEventListener();
+  }
+
+  private updateCartEventListener(): void {
+    PublishSubscriber().subscribe('updateCart', (cart) => {
+      this.initQuantityFromCart();
+    });
+  }
+
+  private loginEventListener(): void {
+    PublishSubscriber().subscribe('userLoggedIn', (cart) => {
+      this.initQuantityFromCart();
+    });
+  }
+
+  private logoutEventListener(): void {
+    PublishSubscriber().subscribe('userLoggedOut', (cart) => {
+      this.initQuantityFromCart();
+    });
   }
 
   private async initQuantityFromCart(): Promise<void> {
@@ -86,7 +100,6 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
       this.product.id,
       this.product.masterVariant.id,
     );
-
     if (this.productQuantity > 0) {
       this.addToCartButton.addClass('hidden');
       this.quantityControls.removeClass('hidden');
@@ -99,7 +112,13 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
 
   private addEventListenerAddToCartButton(): void {
     this.addToCartButton.addEventListener('click', async () => {
-      await SdkApi().addLineItemToCart(this.product.id, this.product.masterVariant.id);
+      const result = await SdkApi().addLineItemToCart(
+        this.product.id,
+        this.product.masterVariant.id,
+      );
+      if (result.body) {
+        PublishSubscriber().publish('updateCart', { cart: result.body });
+      }
       this.initQuantityFromCart();
     });
     this.addToCartButton.stopPropagation();
@@ -112,7 +131,10 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
         .then(async (lineItem) => {
           if (lineItem) {
             this.productQuantity--;
-            await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+            const result = await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+            if (result.body) {
+              PublishSubscriber().publish('updateCart', { cart: result.body });
+            }
           }
         });
       this.initQuantityFromCart();
@@ -127,7 +149,10 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
         .then(async (lineItem) => {
           if (lineItem) {
             this.productQuantity++;
-            await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+            const result = await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+            if (result.body) {
+              PublishSubscriber().publish('updateCart', { cart: result.body });
+            }
           }
         });
       this.initQuantityFromCart();
