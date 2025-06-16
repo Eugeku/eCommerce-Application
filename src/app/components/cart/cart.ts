@@ -27,7 +27,7 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
   private readonly clearButton: BaseComponent<HTMLButtonElement>;
   private readonly checkoutButton: BaseComponent<HTMLButtonElement>;
 
-  private items: CartItemComponent[] = [];
+  private items: ReturnType<typeof CartItem>[] = [];
 
   constructor(id: string = 'cart-component', className: string = 'cart-component') {
     super(Tags.DIV, id, className);

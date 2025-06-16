@@ -3,6 +3,7 @@ import type { TokenCache, TokenStore } from '@commercetools/ts-client';
 
 const MAIN_TOKEN_KEY = 'commercetools_token';
 const USER = 'current_user';
+const ANONYMOUS_ID = 'anonymousId';
 
 export const PersistentTokenCache: TokenCache = {
   get: (): TokenStore => {
@@ -39,5 +40,16 @@ export const UserCache = {
   },
   clearUser: (): void => {
     localStorage.removeItem(USER);
+  },
+  getOrCreateAnonymousId(): string {
+    let id = localStorage.getItem(ANONYMOUS_ID);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(ANONYMOUS_ID, id);
+    }
+    return id;
+  },
+  clearAnonymousId: (): void => {
+    localStorage.removeItem(ANONYMOUS_ID);
   },
 };

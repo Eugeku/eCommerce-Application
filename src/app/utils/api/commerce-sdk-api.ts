@@ -1,8 +1,10 @@
 import {
   type ByProjectKeyRequestBuilder,
+  type Cart,
   type CategoryPagedQueryResponse,
   createApiBuilderFromCtpClient,
   type Customer,
+  type LineItem,
   type MyCustomerUpdateAction,
   type ProductProjectionPagedSearchResponse,
 } from '@commercetools/platform-sdk';
@@ -179,12 +181,15 @@ class CommerceSdkApi {
   }
 
   public async loginUser(email: string, password: string): Promise<ClientResponse> {
-    return this.apiRoot
+    const anonymousId = UserCache.getOrCreateAnonymousId();
+    const response = await this.apiRoot
       .login()
       .post({
-        body: { email, password },
+        body: { email, password, anonymousId: anonymousId ?? undefined },
       })
       .execute();
+    UserCache.clearAnonymousId();
+    return response;
   }
 
   public logoutUser(): void {
@@ -223,10 +228,129 @@ class CommerceSdkApi {
     return this.apiRoot.categories().get().execute();
   }
 
-  public withAnonymousSessionFlow(): CommerceSdkApi {
-    this.apiRoot = createApiBuilderFromCtpClient(ApiClient().anonymousClient()).withProjectKey(
-      this.projectKeyObject,
+  public async getCart(): Promise<ClientResponse<Cart>> {
+    const cart = await this.apiRoot
+      .me()
+      .activeCart()
+      .get()
+      .execute()
+      .catch(() =>
+        this.apiRoot
+          .me()
+          .carts()
+          .post({ body: { currency: 'USD', country: 'US' } })
+          .execute(),
+      );
+
+    return cart;
+  }
+
+  public async getProductQuantityInCart(productId: string, variantId?: number): Promise<number> {
+    const lineItem: LineItem | undefined = await this.getLineItemByProductId(productId, variantId);
+    return lineItem?.quantity ?? 0;
+  }
+
+  public async getLineItemByProductId(
+    productId: string,
+    variantId?: number,
+  ): Promise<LineItem | undefined> {
+    const cartResponse = await this.getCart();
+    const cart = cartResponse.body;
+
+    if (!cart || !cart.lineItems) return undefined;
+
+    const lineItem: LineItem | undefined = cart.lineItems.find(
+      (item) =>
+        item.productId === productId && (variantId === undefined || item.variant.id === variantId),
     );
+
+    return lineItem;
+  }
+
+  public async addLineItemToCart(
+    productId: string,
+    variantId: number,
+    quantity = 1,
+  ): Promise<ClientResponse<Cart>> {
+    const cart = await this.getCart();
+
+    if (cart.body) {
+      return this.apiRoot
+        .me()
+        .carts()
+        .withId({ ID: cart.body.id })
+        .post({
+          body: {
+            version: cart.body.version,
+            actions: [
+              {
+                action: 'addLineItem',
+                productId,
+                variantId,
+                quantity,
+              },
+            ],
+          },
+        })
+        .execute();
+    }
+    return cart;
+  }
+
+  public async changeLineItemCart(lineItemId: string, quantity = 1): Promise<ClientResponse<Cart>> {
+    const cart = await this.getCart();
+
+    if (cart.body) {
+      return this.apiRoot
+        .me()
+        .carts()
+        .withId({ ID: cart.body.id })
+        .post({
+          body: {
+            version: cart.body.version,
+            actions: [
+              {
+                action: 'changeLineItemQuantity',
+                lineItemId: lineItemId,
+                quantity,
+              },
+            ],
+          },
+        })
+        .execute();
+    }
+    return cart;
+  }
+
+  public async removeLineItemFromCart(lineItemId: string): Promise<ClientResponse<Cart>> {
+    const cart = await this.getCart();
+
+    if (cart.body) {
+      return this.apiRoot
+        .me()
+        .carts()
+        .withId({ ID: cart.body.id })
+        .post({
+          body: {
+            version: cart.body.version,
+            actions: [
+              {
+                action: 'removeLineItem',
+                lineItemId,
+              },
+            ],
+          },
+        })
+        .execute();
+    }
+    return cart;
+  }
+
+  public withAnonymousSessionFlow(): CommerceSdkApi {
+    const anonymousId = UserCache.getOrCreateAnonymousId();
+    this.apiRoot = createApiBuilderFromCtpClient(
+      ApiClient().anonymousClient(anonymousId),
+    ).withProjectKey(this.projectKeyObject);
     return this;
   }
 

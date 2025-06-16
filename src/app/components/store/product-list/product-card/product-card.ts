@@ -8,6 +8,7 @@ import {
 } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
 import './product-card.scss';
+import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 
 class ProductCardComponent extends BaseComponent<HTMLDivElement> {
   public readonly product: ProductProjection;
@@ -25,6 +26,8 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
   private readonly plusButton: BaseComponent<HTMLButtonElement>;
   private readonly counter: BaseComponent<HTMLDivElement>;
   private readonly minusButton: BaseComponent<HTMLButtonElement>;
+
+  private productQuantity: number = 0;
 
   constructor(
     id: string = '',
@@ -53,6 +56,7 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
     this.productText = createH2(undefined, 'product-card-text');
     this.productDescription = createP(undefined, 'product-card-description');
 
+    this.initQuantityFromCart();
     this.init();
   }
 
@@ -77,38 +81,56 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
     this.addEventListenerPlusButton();
   }
 
-  protected addEventListenerAddToCartButton(): void {
-    this.addToCartButton.addEventListener('click', () => {
-      console.log(
-        'Added Item to Cart for the first time: ' + this.productText.getElement().textContent,
-      );
-      // add item to cart
-      // change counter
+  private async initQuantityFromCart(): Promise<void> {
+    this.productQuantity = await SdkApi().getProductQuantityInCart(
+      this.product.id,
+      this.product.masterVariant.id,
+    );
+
+    if (this.productQuantity > 0) {
       this.addToCartButton.addClass('hidden');
       this.quantityControls.removeClass('hidden');
+      this.counter.setText(this.productQuantity.toString());
+    } else {
+      this.addToCartButton.removeClass('hidden');
+      this.quantityControls.addClass('hidden');
+    }
+  }
+
+  private addEventListenerAddToCartButton(): void {
+    this.addToCartButton.addEventListener('click', async () => {
+      await SdkApi().addLineItemToCart(this.product.id, this.product.masterVariant.id);
+      this.initQuantityFromCart();
     });
     this.addToCartButton.stopPropagation();
   }
 
-  protected addEventListenerMinusButton(): void {
-    this.minusButton.addEventListener('click', () => {
-      console.log('Removed Item: ' + this.productText.getElement().textContent);
-      // remove item from cart
-      // change counter
-      // check for (quantity <= 0), if true show addToCartButton and hide quantityControls
+  private addEventListenerMinusButton(): void {
+    this.minusButton.addEventListener('click', async () => {
+      await SdkApi()
+        .getLineItemByProductId(this.product.id, this.product.masterVariant.id)
+        .then(async (lineItem) => {
+          if (lineItem) {
+            this.productQuantity--;
+            await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+          }
+        });
+      this.initQuantityFromCart();
     });
     this.minusButton.stopPropagation();
   }
 
-  protected addEventListenerPlusButton(): void {
-    this.plusButton.addEventListener('click', () => {
-      console.log('Added Item: ' + this.productText.getElement().textContent);
-      // check available amount of products, if true
-      //then
-      // add item to cart
-      // change counter
-      //else
-      // show error
+  private addEventListenerPlusButton(): void {
+    this.plusButton.addEventListener('click', async () => {
+      await SdkApi()
+        .getLineItemByProductId(this.product.id, this.product.masterVariant.id)
+        .then(async (lineItem) => {
+          if (lineItem) {
+            this.productQuantity++;
+            await SdkApi().changeLineItemCart(lineItem.id, this.productQuantity);
+          }
+        });
+      this.initQuantityFromCart();
     });
     this.plusButton.stopPropagation();
   }
@@ -165,7 +187,7 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
     this.minusButton.appendTo(this.quantityControls.getElement());
     this.minusButton.setText('-');
     this.counter.appendTo(this.quantityControls.getElement());
-    this.counter.setText('0');
+    this.counter.setText(this.productQuantity.toString());
     this.plusButton.appendTo(this.quantityControls.getElement());
     this.plusButton.setText('+');
   }

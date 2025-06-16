@@ -27,9 +27,9 @@ class ClientBuilderUtility {
     return ClientBuilderUtility.instance;
   }
 
-  public anonymousClient(): Client {
+  public anonymousClient(anonymousId?: string): Client {
     return this.clientCommonPart()
-      .withAnonymousSessionFlow(this.prepareAuthMiddlewareOptions())
+      .withAnonymousSessionFlow(this.prepareAuthMiddlewareOptions(anonymousId))
       .build();
   }
 
@@ -56,7 +56,7 @@ class ClientBuilderUtility {
       .withLoggerMiddleware();
   }
 
-  private prepareAuthMiddlewareOptions(): AuthMiddlewareOptions {
+  private prepareAuthMiddlewareOptions(anonymousId?: string): AuthMiddlewareOptions {
     return {
       host: this.authHost,
       projectKey: this.projectKey,
@@ -66,6 +66,7 @@ class ClientBuilderUtility {
       },
       scopes: this.scopes,
       httpClient: fetch,
+      ...(anonymousId ? { anonymousId } : {}),
     };
   }
 
