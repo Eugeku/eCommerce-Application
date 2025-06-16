@@ -3,8 +3,8 @@ import BaseComponent from '@common-components/base-component';
 import {
   createButton,
   createDiv,
-  createH1,
   createH2,
+  createP,
 } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
 import './product-card.scss';
@@ -51,7 +51,7 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
 
     this.productTextWrapper = createDiv(undefined, 'product-card-text-wrapper');
     this.productText = createH2(undefined, 'product-card-text');
-    this.productDescription = createDiv(undefined, 'product-card-description');
+    this.productDescription = createP(undefined, 'product-card-description');
 
     this.init();
   }
@@ -72,9 +72,9 @@ class ProductCardComponent extends BaseComponent<HTMLDivElement> {
   }
 
   protected addEventListeners(): void {
+    this.addEventListenerAddToCartButton();
     this.addEventListenerMinusButton();
     this.addEventListenerPlusButton();
-    this.addEventListenerAddToCartButton();
   }
 
   protected addEventListenerAddToCartButton(): void {
