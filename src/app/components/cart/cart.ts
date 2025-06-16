@@ -101,8 +101,10 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
 
   private addApplyButtonListener(): void {
     this.applyButton.addEventListener('click', async () => {
-      await SdkApi().applyDiscountCodeToCart(this.promoInput.getElement().value);
-      this.setDynamicItems();
+      if (this.promoInput.getElement().value) {
+        await SdkApi().applyDiscountCodeToCart(this.promoInput.getElement().value);
+        this.setDynamicItems();
+      }
     });
   }
 
