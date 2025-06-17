@@ -172,13 +172,19 @@
           .store-link {
             cursor: pointer;
 
-            margin-left: 0.3rem;
+            border: none;
 
+            font-family: Genshin, serif;
             font-size: 1.3rem;
             color: var(--gold);
-            text-decoration: none;
+            text-shadow: var(--cosmos);
 
-            transition: color 0.2s ease;
+            appearance: none;
+            background: none;
+
+            transition:
+              color 0.4s ease-in-out,
+              text-shadow 0.4s ease-in-out;
 
             &:hover {
               color: var(--orange);
