@@ -1,6 +1,6 @@
+import { router } from '@app/router';
 import BaseComponent from '@common-components/base-component';
 import {
-  createA,
   createButton,
   createDiv,
   createH2,
@@ -206,15 +206,20 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
 
   private renderEmptyCartMessage(): void {
     this.emptyCartMessage.removeChildren();
-    const messageText = createP(undefined, 'message-text');
-    messageText.setText('Your cart is currently empty. Start your shopping journey in ');
+    const messageText: BaseComponent<HTMLParagraphElement> = createP(undefined, 'message-text');
+    const messageText2: BaseComponent<HTMLParagraphElement> = createP(undefined, 'message-text');
+    messageText.setText('Your cart is currently empty.');
+    messageText2.setText('Start your shopping journey in the ');
 
-    const storeLink = createA(undefined, 'store-link');
-    storeLink.setText('the Store');
-    storeLink.setAttribute('href', '#/store');
+    const storeLink: BaseComponent<HTMLButtonElement> = createButton(undefined, 'store-link');
+    storeLink.setText('Store');
+    storeLink.addEventListener('click', () => {
+      router.navigate('#/store');
+    });
 
-    storeLink.appendTo(messageText.getElement());
+    storeLink.appendTo(messageText2.getElement());
     messageText.appendTo(this.emptyCartMessage.getElement());
+    messageText2.appendTo(this.emptyCartMessage.getElement());
 
     this.emptyCartMessage.appendTo(this.cartItems.getElement());
   }

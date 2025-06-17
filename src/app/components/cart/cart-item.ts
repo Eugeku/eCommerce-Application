@@ -14,7 +14,7 @@ import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 
 class CartItemComponent extends BaseComponent<HTMLDivElement> {
   public lineItem: LineItem;
-  private readonly itemImage: BaseComponent<HTMLImageElement>;
+  private readonly itemImage: BaseComponent<HTMLDivElement>;
   private readonly itemDetails: BaseComponent<HTMLDivElement>;
   private readonly itemName: BaseComponent<HTMLHeadingElement>;
   private readonly quantityCounter: BaseComponent<HTMLDivElement>;
@@ -28,7 +28,7 @@ class CartItemComponent extends BaseComponent<HTMLDivElement> {
     super(Tags.DIV, id, className);
 
     this.lineItem = lineItem;
-    this.itemImage = createImg(undefined, 'item-image');
+    this.itemImage = createDiv(undefined, 'item-image');
     this.itemDetails = createDiv(undefined, 'item-details');
     this.itemName = createH3(undefined, 'item-name');
     this.quantityCounter = createDiv(undefined, 'quantity-counter');
