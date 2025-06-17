@@ -145,6 +145,28 @@
           }
         }
       }
+
+      .empty-cart-message {
+        max-width: 18rem;
+        margin: auto;
+        line-height: 1.8;
+        text-align: center;
+
+        .store-link {
+          cursor: pointer;
+
+          font-size: 1.3rem;
+          color: var(--gold);
+          text-decoration: none;
+          text-shadow: 0 0 0.5rem var(--beige);
+
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: var(--orange);
+          }
+        }
+      }
     }
 
     @media (width <=870px) {

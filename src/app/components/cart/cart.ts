@@ -1,5 +1,6 @@
 import BaseComponent from '@common-components/base-component';
 import {
+  createA,
   createButton,
   createDiv,
   createH2,
@@ -26,6 +27,7 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
   private readonly cartButtons: BaseComponent<HTMLDivElement>;
   private readonly clearButton: BaseComponent<HTMLButtonElement>;
   private readonly checkoutButton: BaseComponent<HTMLButtonElement>;
+  private readonly emptyCartMessage: BaseComponent<HTMLDivElement>;
 
   private items: ReturnType<typeof CartItem>[] = [];
 
@@ -44,6 +46,7 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
     this.cartButtons = createDiv(undefined, 'cart-buttons');
     this.clearButton = this.createClearButton();
     this.checkoutButton = this.createCheckoutButton();
+    this.emptyCartMessage = createDiv(undefined, 'empty-cart-message');
 
     this.init();
 
@@ -171,14 +174,32 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
         this.cartItems.removeChildren();
         this.items = [];
         const lineItems = response.body?.lineItems;
-        lineItems?.map((lineItem) => {
-          if (lineItem) {
+
+        if (lineItems && lineItems.length > 0) {
+          for (const lineItem of lineItems) {
             const cartItem = CartItem(lineItem);
             this.items.push(cartItem);
             cartItem.appendTo(this.cartItems.getElement());
           }
-        });
+        } else {
+          this.renderEmptyCartMessage();
+        }
       });
+  }
+
+  private renderEmptyCartMessage(): void {
+    this.emptyCartMessage.removeChildren();
+    const messageText = createP(undefined, 'message-text');
+    messageText.setText('Your cart is currently empty. Start your shopping journey in ');
+
+    const storeLink = createA(undefined, 'store-link');
+    storeLink.setText('the Store');
+    storeLink.setAttribute('href', '#/store');
+
+    storeLink.appendTo(messageText.getElement());
+    messageText.appendTo(this.emptyCartMessage.getElement());
+
+    this.emptyCartMessage.appendTo(this.cartItems.getElement());
   }
 }
 
