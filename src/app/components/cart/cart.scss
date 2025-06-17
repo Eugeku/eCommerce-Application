@@ -35,29 +35,26 @@
         justify-content: space-between;
 
         padding-bottom: 1rem;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 0.1rem solid var(--transparent-white-30);
 
         .item-image {
-          width: 100px;
-          height: 100px;
+          width: 7rem;
+          height: 7rem;
           margin-right: 1rem;
-          border-radius: 8px;
+          border-radius: 0.5rem;
 
-          object-fit: cover;
           background-repeat: no-repeat;
           background-position: center;
-          background-size: 60%;
+          background-size: 95%;
 
           @media (width <=600px) {
-            width: 80px;
-            height: 80px;
-            background-size: 80%;
+            width: 5rem;
+            height: 5rem;
           }
 
           @media (width <=400px) {
-            width: 60px;
-            height: 60px;
-            background-size: 100%;
+            width: 3.75rem;
+            height: 3.75rem;
           }
         }
 
@@ -70,34 +67,33 @@
           width: 10rem;
 
           .quantity-counter {
-            overflow: hidden;
             display: inline-flex;
+            gap: 0.5rem;
+            align-items: center;
             align-self: start;
 
-            max-width: 5.1rem;
             margin-top: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            border: none;
 
             .increase-button,
             .decrease-button {
               cursor: pointer;
 
-              width: 30px;
-              height: 30px;
+              width: 1.8rem;
+              height: 1.8rem;
               border: none;
+              border-radius: 5rem;
 
-              font-weight: bold;
+              font-family: Genshin, serif;
+              color: var(--beige);
+              text-shadow: 0 0 0.5rem var(--cosmos);
 
-              background: #eee;
+              background: var(--transparent-white-30);
+
+              transition: background var(--medium-speed) ease-in-out;
 
               &:hover {
-                background: #ddd;
-              }
-
-              &:active {
-                transform: scale(0.95);
-                background: #ccc;
+                background: var(--transparent-white-50);
               }
 
               &:focus {
@@ -106,12 +102,28 @@
             }
 
             .quantity-input {
-              width: 40px;
-              height: 30px;
-              border: none;
+              cursor: default;
 
-              font-weight: bold;
+              width: 4rem;
+              height: 3rem;
+              border: none;
+              border-radius: 5rem;
+
+              font-family: Genshin, serif;
+              font-size: 1.2rem;
+              color: var(--beige);
               text-align: center;
+              text-shadow: 0 0 0.5rem var(--cosmos);
+
+              background-color: var(--transparent-white-30);
+
+              &:focus {
+                outline: none;
+              }
+
+              @media screen and (width <= 350px) {
+                width: 4rem;
+              }
             }
           }
 
@@ -144,33 +156,45 @@
             box-shadow: 0 0 1rem 0 var(--white);
           }
         }
+
+        &:last-of-type {
+          padding-bottom: 0;
+          border-bottom: 0.1rem solid transparent;
+        }
       }
 
       .empty-cart-message {
-        max-width: 18rem;
         margin: auto;
         line-height: 1.8;
         text-align: center;
 
-        .store-link {
-          cursor: pointer;
+        .message-text {
+          .store-link {
+            cursor: pointer;
 
-          font-size: 1.3rem;
-          color: var(--gold);
-          text-decoration: none;
-          text-shadow: 0 0 0.5rem var(--beige);
+            margin-left: 0.3rem;
 
-          transition: color 0.2s ease;
+            font-size: 1.3rem;
+            color: var(--gold);
+            text-decoration: none;
 
-          &:hover {
-            color: var(--orange);
+            transition: color 0.2s ease;
+
+            &:hover {
+              color: var(--orange);
+              text-shadow: 0 0 0.5rem var(--white);
+            }
           }
         }
       }
     }
 
-    @media (width <=870px) {
+    @media (width <= 870px) {
       grid-template-columns: 1fr;
+    }
+
+    @media (width <= 450px) {
+      padding: 1rem;
     }
   }
 
@@ -191,7 +215,7 @@
 
     .promo-section {
       display: flex;
-      gap: 0.5rem;
+      gap: 1rem;
       align-items: center;
       margin-bottom: 1.5rem;
 
