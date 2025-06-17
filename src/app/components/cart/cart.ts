@@ -70,31 +70,48 @@ class CartComponent extends BaseComponent<HTMLDivElement> {
     this.addUserLoginEventListener();
     this.updateCartEventListener();
     this.addApplyButtonListener();
+    this.addClearButtonListener();
+  }
+
+  private addClearButtonListener(): void {
+    this.clearButton.addEventListener('click', async () => {
+      const result = await SdkApi().removeLineItemFromCart(
+        this.items.map((item) => item.lineItem.id),
+      );
+      if (result.body) {
+        PublishSubscriber().publish('updateCart', { cart: result.body });
+        this.items = [];
+        this.setDynamicItems();
+        this.setItems();
+      }
+    });
   }
 
   private addUserLoginEventListener(): void {
     PublishSubscriber().subscribe('userLoggedIn', (userId) => {
-      this.setItems();
-      this.setTotalPrice();
-      this.setOriginalPrice();
+      this.setDynamicItems();
     });
   }
 
   private updateCartEventListener(): void {
     PublishSubscriber().subscribe('updateCart', (cart) => {
-      this.setItems();
-      this.setTotalPrice();
-      this.setOriginalPrice();
+      this.setDynamicItems();
     });
   }
 
   private addApplyButtonListener(): void {
     this.applyButton.addEventListener('click', async () => {
-      await SdkApi().applyDiscountCodeToCart(this.promoInput.getElement().value);
-      this.setItems();
-      this.setTotalPrice();
-      this.setOriginalPrice();
+      if (this.promoInput.getElement().value) {
+        await SdkApi().applyDiscountCodeToCart(this.promoInput.getElement().value);
+        this.setDynamicItems();
+      }
     });
+  }
+
+  private setDynamicItems(): void {
+    this.setItems();
+    this.setTotalPrice();
+    this.setOriginalPrice();
   }
 
   private renderCartTitle(): void {

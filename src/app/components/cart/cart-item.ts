@@ -13,7 +13,7 @@ import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
 
 class CartItemComponent extends BaseComponent<HTMLDivElement> {
-  private lineItem: LineItem;
+  public lineItem: LineItem;
   private readonly itemImage: BaseComponent<HTMLImageElement>;
   private readonly itemDetails: BaseComponent<HTMLDivElement>;
   private readonly itemName: BaseComponent<HTMLHeadingElement>;
@@ -91,7 +91,7 @@ class CartItemComponent extends BaseComponent<HTMLDivElement> {
 
   private addRemoveButtonListener(): void {
     this.removeButton.addEventListener('click', async () => {
-      const result = await SdkApi().removeLineItemFromCart(this.lineItem.id);
+      const result = await SdkApi().removeLineItemFromCart([this.lineItem.id]);
       if (result.body) {
         PublishSubscriber().publish('updateCart', { cart: result.body });
       }
