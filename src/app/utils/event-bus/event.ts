@@ -1,4 +1,4 @@
-import { type ProductProjection } from '@commercetools/platform-sdk';
+import { type Cart, type ProductProjection } from '@commercetools/platform-sdk';
 
 export type AppEvents = {
   userLoggedIn: { userId: string };
@@ -13,4 +13,5 @@ export type AppEvents = {
   openModalSlider: { product: ProductProjection };
   closeModalSlider: object;
   selectProduct: { product: ProductProjection };
+  updateCart: { cart: Cart };
 };

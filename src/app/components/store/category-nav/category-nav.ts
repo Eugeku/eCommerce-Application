@@ -25,7 +25,6 @@ class CategoryNavComponent extends BaseComponent<HTMLUListElement> {
     await SdkApi()
       .getCategories()
       .then((response) => {
-        console.log(response);
         response.body?.results.map((category) => {
           const categoryItem = CategoryElement(category);
           this.items.push(categoryItem);
@@ -38,7 +37,6 @@ class CategoryNavComponent extends BaseComponent<HTMLUListElement> {
     this.items.push(categoryElement);
     categoryElement.setActive(true);
     categoryElement.appendTo(this.getElement());
-
     await this.loadCategories();
 
     this.items.map((item) => {

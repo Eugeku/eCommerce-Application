@@ -1,8 +1,8 @@
 import BaseComponent from '@common-components/base-component';
 import { Tags } from '@common-components/tags';
-import './filter.scss';
 import { createInput, createOption, createSelect } from '../../common/base-component-factory';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
+import './filter.scss';
 
 class FilterComponent extends BaseComponent<HTMLDivElement> {
   private readonly filterInput: BaseComponent<HTMLInputElement>;
@@ -58,7 +58,6 @@ class FilterComponent extends BaseComponent<HTMLDivElement> {
     this.select.addEventListener('change', () => {
       const value = this.select.getElement().value;
       PublishSubscriber().publish('sort', { text: value });
-      console.log(value);
     });
   }
 }

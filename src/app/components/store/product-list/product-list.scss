@@ -4,10 +4,14 @@
   gap: 1rem;
   align-items: center;
 
+  width: 100%;
+
   .product-list-wrapper {
-    display: flex;
-    flex-flow: row wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 19rem);
     gap: 1rem;
-    justify-content: space-around;
+    justify-content: center;
+
+    width: 100%;
   }
 }

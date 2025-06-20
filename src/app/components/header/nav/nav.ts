@@ -1,10 +1,11 @@
 import { router } from '@app/router';
 import BaseComponent from '@common-components/base-component';
+import { createDiv } from '@common-components/base-component-factory';
 import { Tags } from '@common-components/tags';
 import { NavItem } from './nav-item/nav-item';
-import './nav.scss';
 import { SdkApi } from '@/app/utils/api/commerce-sdk-api';
 import { PublishSubscriber } from '@/app/utils/event-bus/event-bus';
+import './nav.scss';
 
 class NavComponent extends BaseComponent<HTMLDivElement> {
   private readonly homeBtn: BaseComponent<HTMLButtonElement>;
@@ -15,6 +16,7 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
   private readonly registerBtn: BaseComponent<HTMLButtonElement>;
   private readonly profileBtn: BaseComponent<HTMLButtonElement>;
   private readonly logoutBtn: BaseComponent<HTMLButtonElement>;
+  private readonly cartCounter: BaseComponent<HTMLDivElement>;
 
   constructor(id: string = 'nav-component', className: string = 'nav-component') {
     super(Tags.DIV, id, className);
@@ -26,6 +28,7 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
     this.registerBtn = NavItem('register', 'button nav-item', 'register', 'Register');
     this.profileBtn = NavItem('profile', 'button nav-item', 'profile', 'Profile');
     this.logoutBtn = NavItem('logout', 'button nav-item', 'logout', 'Logout');
+    this.cartCounter = createDiv(undefined, 'cart-counter');
 
     this.init();
   }
@@ -35,6 +38,7 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
     this.storeBtn.appendTo(this.getElement());
     this.aboutUsBtn.appendTo(this.getElement());
     this.cartBtn.appendTo(this.getElement());
+    this.renderCartCounter();
     this.renderLoginLogout(SdkApi().isLoggedIn());
   }
 
@@ -70,16 +74,32 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
     this.logoutBtn.addEventListener('click', () => {
       SdkApi().logoutUser();
       this.renderLoginLogout(SdkApi().isLoggedIn());
+      PublishSubscriber().publish('userLoggedOut', { userId: '' });
       PublishSubscriber().publish('hideBurger', {});
       router.navigate('#/main');
     });
 
     this.addLoginEventListener();
+    this.addCartUpdateEventListener();
   }
 
   private addLoginEventListener(): void {
     PublishSubscriber().subscribe('userLoggedIn', () => {
       this.renderLoginLogout(true);
+    });
+  }
+
+  private addCartUpdateEventListener(): void {
+    PublishSubscriber().subscribe('updateCart', (cart) => {
+      this.updateCartCounter(cart.cart.lineItems.length);
+    });
+
+    PublishSubscriber().subscribe('userLoggedOut', () => {
+      this.loadCartNumber();
+    });
+
+    PublishSubscriber().subscribe('userLoggedIn', () => {
+      this.loadCartNumber();
     });
   }
 
@@ -95,6 +115,27 @@ class NavComponent extends BaseComponent<HTMLDivElement> {
       this.loginBtn.appendTo(this.getElement());
       this.registerBtn.appendTo(this.getElement());
     }
+  }
+
+  private renderCartCounter(): void {
+    this.cartCounter.appendTo(this.cartBtn.getElement());
+    this.loadCartNumber();
+  }
+
+  private loadCartNumber(): void {
+    SdkApi()
+      .getCart()
+      .then((cart) => {
+        if (cart.body) {
+          this.updateCartCounter(cart.body.lineItems.length);
+        } else {
+          this.updateCartCounter(0);
+        }
+      });
+  }
+
+  private updateCartCounter(counter: number = 0): void {
+    this.cartCounter.setText(counter.toString());
   }
 }
 

@@ -1,5 +1,5 @@
-import { ApiPopup } from '@components/api-popup/api-popup';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { ApiPopup } from '@/app/components/popups/api-popup/api-popup';
 
 /* eslint-disable max-lines-per-function */
 describe('ApiPopupComponent', () => {

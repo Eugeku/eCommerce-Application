@@ -20,7 +20,7 @@ class ProductListComponent extends BaseComponent<HTMLDivElement> {
     this.searchOptions = {
       filter: [],
       sort: ['name.en-US asc'],
-      limit: 10,
+      limit: 12,
       offset: 0,
     };
 
