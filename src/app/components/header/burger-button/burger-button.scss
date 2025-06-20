@@ -1,0 +1,48 @@
+.burger-button {
+  cursor: pointer;
+
+  z-index: 30;
+
+  display: none;
+
+  width: 2.5rem;
+  height: 2.5rem;
+
+  .burger-line {
+    width: 1.25rem;
+    height: 0.25rem;
+    border-radius: 2rem;
+
+    background-color: var(--beige);
+
+    transition:
+      transform ease-in-out 0.4s,
+      color ease-in-out 0.4s,
+      box-shadow ease-in-out 0.4s;
+  }
+
+  &:hover {
+    .burger-line {
+      background-color: var(--white);
+      box-shadow: 0 0 0.5rem var(--white);
+    }
+  }
+
+  @media screen and (width <= 685px) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+
+    &.crossed {
+      :nth-child(1) {
+        transform: rotate(45deg);
+      }
+
+      :nth-child(2) {
+        transform: rotate(-45deg);
+      }
+    }
+  }
+}

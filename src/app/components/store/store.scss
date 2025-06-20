@@ -1,0 +1,15 @@
+.store-component {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+
+  width: 98svw;
+  max-width: 1440px;
+  padding: 1rem;
+
+  .heading-2 {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+  }
+}

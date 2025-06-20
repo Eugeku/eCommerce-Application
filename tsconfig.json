@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "outDir": "./deploy",
+    "module": "ESNext",
+    "target": "ESNext",
+    "sourceMap": false,
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@app/*": ["./src/app/*"],
+      "@utils/*": ["./src/app/utils/*"],
+      "@components/*": ["./src/app/components/*"],
+      "@common-components/*": ["./src/app/components/common/*"]
+    }
+  },
+  "include": ["src", "vite-env.d.ts"],
+  "exclude": ["node_modules", "deploy"]
+}

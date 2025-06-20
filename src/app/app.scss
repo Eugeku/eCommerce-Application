@@ -1,0 +1,73 @@
+@import url('./css/reset.scss');
+@import url('./css/variables.scss');
+
+@font-face {
+  font-family: Genshin;
+  src: url('/assets/fonts/Genshin-Impact-Font.ttf');
+}
+
+* {
+  scroll-behavior: smooth;
+  scrollbar-color: var(--cosmos-70) var(--blue-70);
+  scrollbar-gutter: stable;
+  box-sizing: border-box;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 100vh;
+  margin: 0 auto;
+  margin: 0;
+  padding: 0;
+
+  font-family: Genshin, serif;
+  color: var(--beige);
+  text-shadow: 0 0 0.5rem var(--cosmos);
+
+  background-color: var(--blue);
+  background-image: url('/assets/backgrounds/cosmos-min.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+
+  .heading-1,
+  .heading-2,
+  .heading-3,
+  .heading-4 {
+    font-family: Genshin, serif;
+  }
+
+  .heading-1 {
+    font-size: 3rem;
+    text-align: center;
+    letter-spacing: 0.2rem;
+  }
+
+  .heading-2 {
+    text-align: center;
+    letter-spacing: 0.15rem;
+  }
+
+  .heading-3 {
+    letter-spacing: 0.1rem;
+  }
+
+  .heading-4 {
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
+  .button {
+    font-family: Genshin, serif;
+    appearance: none;
+  }
+
+  .hidden {
+    display: none;
+  }
+}

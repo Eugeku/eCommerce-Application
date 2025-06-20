@@ -1,0 +1,66 @@
+.delete-address-popup-component {
+  overflow: unset;
+  padding: 0;
+  border: unset;
+  background: unset;
+
+  &::backdrop {
+    backdrop-filter: blur(0.7rem);
+    transition-duration: var(--medium-speed);
+    transition-property: backdrop-filter;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+
+    padding: 1.5rem 1.5rem 2rem;
+    border: none;
+    border-radius: 1rem;
+
+    color: var(--beige);
+
+    background-image: linear-gradient(var(--blue-40), var(--cosmos-70));
+    box-shadow: 0 0 1rem 0 var(--white);
+
+    .button-container {
+      display: flex;
+      gap: 2rem;
+
+      .close-button,
+      .delete-button {
+        cursor: pointer;
+
+        width: fit-content;
+        padding: 0.7rem 1rem;
+        border: none;
+        border-radius: 1rem;
+
+        font-family: Genshin, serif;
+        font-size: 1rem;
+        color: var(--beige);
+        text-shadow: 0 0 0.5rem var(--cosmos);
+
+        background-color: var(--transparent-white-15);
+        box-shadow: 0 0 0.5rem 0 var(--white);
+
+        transition:
+          background-color ease-in-out 0.4s,
+          box-shadow ease-in-out 0.4s;
+
+        &:hover {
+          background-color: var(--transparent-white-30);
+        }
+
+        &:disabled {
+          cursor: not-allowed;
+          color: var(--transparent-white-50);
+          background: var(--transparent-white-15);
+          box-shadow: 0 0 0.2rem 0 var(--white);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+.nav-item {
+  cursor: pointer;
+
+  display: flex;
+  gap: 0.0034vw;
+  align-items: center;
+
+  padding: 0.88vw 1.44vw 0.88vw 1.11vw;
+  border-radius: 1rem;
+
+  color: var(--beige);
+  text-shadow: 0 0 0.5rem var(--cosmos);
+
+  background-color: transparent;
+
+  transition:
+    color ease-in-out 0.4s,
+    background-color ease-in-out 0.4s;
+
+  &:hover {
+    background-color: var(--transparent-white-30);
+  }
+
+  &.active {
+    background-color: var(--transparent-white-30);
+  }
+
+  .nav-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    filter: drop-shadow(0 0 0.3rem var(--cosmos));
+  }
+}

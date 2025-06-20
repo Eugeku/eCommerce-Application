@@ -1,0 +1,68 @@
+{
+  "name": "ecommerce-application",
+  "version": "1.0.0",
+  "description": "Comprehensive online shopping portal",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "npm run format && vite",
+    "build": "npm run format && vite build",
+    "format": "npm run pret && npm run check && npm run lint && npm run stylelint:fix && npm run stylelint",
+    "lint": "eslint .",
+    "pret": "prettier --write .",
+    "check": "prettier --check .",
+    "stylelint": "stylelint '**/*.{css,scss}'",
+    "stylelint:fix": "stylelint '**/*.{css,scss}' --fix",
+    "lint-staged": "lint-staged",
+    "prepare": "husky install ./.husky",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:report": "vitest run --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@commercetools/importapi-sdk": "^6.1.1",
+    "@commercetools/platform-sdk": "^8.9.0",
+    "@commercetools/ts-client": "^3.3.0",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "@types/node": "^22.15.3",
+    "@types/node-fetch": "^2.6.12",
+    "@vitest/coverage-v8": "^3.1.2",
+    "dotenv": "^16.5.0",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-unicorn": "^57.0.0",
+    "husky": "^8.0.3",
+    "jsdom": "^26.1.0",
+    "sass": "^1.87.0",
+    "stylelint": "^16.16.0",
+    "stylelint-config-clean-order": "^7.0.0",
+    "stylelint-config-recommended-scss": "^14.1.0",
+    "stylelint-config-standard": "^37.0.0",
+    "stylelint-config-standard-scss": "^14.0.0",
+    "stylelint-scss": "^6.11.1",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.1",
+    "vite": "^6.3.4",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.1.2"
+  },
+  "lint-staged": {
+    "*src/**/*.{js,ts}": [
+      "npm run pret",
+      "npm run check",
+      "npm run lint"
+    ],
+    "src/**/*.{scss,css}": [
+      "npm run pret",
+      "npm run check",
+      "npm run stylelint",
+      "npm run stylelint:fix"
+    ]
+  }
+}
